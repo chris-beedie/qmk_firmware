@@ -15,30 +15,7 @@
  */
 #include QMK_KEYBOARD_H
 
-/*
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-     TODO - can this be a function? i.e. can i use a const max layer and toggles based on that
-    [0] = LAYOUT(
-        TO(1),       KC_F13,      KC_F14,       KC_F15,      KC_F16
-    ),
-    [1] = LAYOUT(
-        TO(2),       KC_F17,      KC_F18,       KC_F19,      KC_F20
-    ),
-    [2] = LAYOUT(
-        TO(3),       KC_F21,      KC_F22,       KC_F23,      KC_F24
-    ),
-    [3] = LAYOUT(
-        TO(4),       C(KC_F13),      C(KC_F14),       C(KC_F15),      C(KC_F16)
-    ),
-    [4] = LAYOUT(
-        TO(5),       C(KC_F17),      C(KC_F18),       C(KC_F19),      C(KC_F20)
-    ),
-    [5] = LAYOUT(
-        TO(0),       C(KC_F21),      C(KC_F22),       C(KC_F23),      C(KC_F24)
-    )
 
-};
-*/
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* TODO - can this be a function? i.e. can i use a const max layer and toggles based on that */
@@ -63,13 +40,170 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 };
 
+/*
+
+
+for encoder, we could reserve f22/23/24
+
+f22 is ccw
+f23 is button
+f2 is cw
+
+
+
+
+
+
+*/
+
+
+
+
+//todo add encoder button to matrix or at least as direct switch
+
+// do we need to set: #define TAP_CODE_DELAY 100 in your config.h
+
+
+
+/* allowing max layer to be specified
+
+//should we explictly set layer at startup?
+
+//do we need current_layer, can we not just do get_highest_layer(layer_state)
+//this also solves thr problem of know what boot status is
+// static uint8_t current_layer = 0;
+
+#define MAX_LAYER = 3 // number of layers to switch through
+
+
+
+enum my_keycodes {
+  MODE = SAFE_RANGE,
+};
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+    [0] = LAYOUT(
+        MODE,       KC_F13,      KC_F14,       KC_F15,      KC_F16
+    ),
+    [1] = LAYOUT(
+        MODE,       KC_F17,      KC_F18,       KC_F19,      KC_F20
+    ),
+    [2] = LAYOUT(
+        MODE,       KC_F21,      KC_F22,       KC_F23,      KC_F24
+    ),
+    [3] = LAYOUT(
+        MODE,       C(KC_F13),      C(KC_F14),       C(KC_F15),      C(KC_F16)
+    ),
+    [4] = LAYOUT(
+        MODE,       C(KC_F17),      C(KC_F18),       C(KC_F19),      C(KC_F20)
+    ),
+    [5] = LAYOUT(
+        MODE,       C(KC_F21),      C(KC_F22),       C(KC_F23),      C(KC_F24)
+    )
+
+};
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  switch (keycode) {
+    case MODE:
+      if (record->event.pressed) {
+          layer_move(get_highest_layer(state) % HIGHEST_LAYER)
+      }
+      return false; // Skip all further processing of this key
+    default:
+      return true; // Process all other keycodes normally
+  }
+}
+
+//#ifdef RGB_DI_PIN
+layer_state_t layer_state_set_user(layer_state_t state) {
+
+    switch (get_highest_layer(state)) {
+        case 0:
+            rgblight_setrgb (0x00,  0x00, 0xFF);
+            break;
+        case 1:
+            rgblight_setrgb (0xFF,  0x00, 0x00);
+            break;
+        case 2:
+            rgblight_setrgb (0x00,  0xFF, 0x00);
+            break;
+        case 3:
+            rgblight_setrgb (0x7A,  0x00, 0xFF);
+            break;
+        case 4:
+            rgblight_setrgb (0x00, 0x7A, 0xFF);
+            break;
+        case 5:
+            rgblight_setrgb (0x00, 0xFF, 0x7A);
+            break;
+        default: //  for any other layers, or the default layer
+            rgblight_setrgb (0x00,  0x00, 0x00);
+            break;
+    }
+
+    return state;
+}
+#endif
+*/
+
+
+
+
+
 #ifdef ENCODER_ENABLE
 void encoder_update_user(uint8_t index, bool clockwise) {
     //TODO - this needs to respond to whichever layer is active
-    if (!clockwise) {
+    if (clockwise) {
         tap_code(KC_VOLU);
     } else {
         tap_code(KC_VOLD);
     }
 }
 #endif
+
+//todo - light indicating mode
+//ifdef rgbendable
+//blah blah reddit
+
+
+
+/* encoder layers
+
+#ifdef ENCODER_ENABLE
+void encoder_update_user(uint8_t index, bool clockwise) {
+
+    switch (get_highest_layer(layer_state)) {
+        case 0:
+
+            break;
+        case 1:
+
+            break;
+        case 2:
+
+            break;
+        case 3:
+
+            break;
+        case 4:
+
+            break;
+        case 5:
+
+            break;
+        default: //  for any other layers, or the default layer
+            break;
+    }
+
+
+    if (clockwise) {
+        tap_code(KC_VOLU);
+    } else {
+        tap_code(KC_VOLD);
+    }
+}
+#endif
+
+*/
+
