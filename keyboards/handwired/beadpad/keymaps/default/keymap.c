@@ -108,7 +108,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         MODE,       KC_9,      KC_0,       KC_Q,      KC_W
     ),
     [3] = LAYOUT(
-        TO(4),       S(KC_1),      S(KC_2),       S(KC_3),      S(KC_4)
+        MODE,       S(KC_1),      S(KC_2),       S(KC_3),      S(KC_4)
     ),
     [4] = LAYOUT(
         MODE,       S(KC_5),      S(KC_6),       S(KC_7),      S(KC_8)
@@ -143,25 +143,35 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
-    uprintf("KEY EVENT");
-    uprintf("layer_state: %u\n", layer_state);
+    // uprintf("\nKEY EVENT\n");
+    // uprintf("layer_state: %u\n", get_highest_layer(layer_state));
 
   switch (keycode) {
     case MODE:
       if (record->event.pressed) {
-          layer_move((get_highest_layer(layer_state) + 1) % HIGHEST_LAYER);
+        uint8_t new_layer = (get_highest_layer(layer_state) + 1) % HIGHEST_LAYER;
+
+
+        // uprintf("new layer: %u\n",(get_highest_layer(layer_state) + 1) % HIGHEST_LAYER);
+
+
+        layer_move(new_layer);
+
+        // uprintf("layer should be: %u\n", new_layer);
+        // uprintf("layer is now: %u\n", get_highest_layer(layer_state));
       }
       return false; // Skip all further processing of this key
     default:
+      uprintf("key pressed: %u\n", keycode);
       return true; // Process all other keycodes normally
   }
 }
 
-#ifdef RGB_DI_PIN
+
 layer_state_t layer_state_set_user(layer_state_t state) {
-    uprintf("SET STATE");
-    uprintf("layer_state: %u\n", layer_state);
-    uprintf("state: %u\n", state);
+    uprintf("\nSET STATE\n");
+    // uprintf("layer_state: %u\n", get_highest_layer(layer_state));
+    // uprintf("state: %u\n", get_highest_layer(state));
     switch (get_highest_layer(layer_state)) {
         case 0:
             rgblight_setrgb (0x00,  0x00, 0xFF);
@@ -188,8 +198,41 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 
     return state;
 }
-#endif
 
+void keyboard_post_init_user(void) {
+  rgblight_setrgb (0x00, 0xFF, 0x7A);
+  uprintf("hello");
+}
+
+
+void update_mode_led(void) {
+
+ switch (get_highest_layer(layer_state)) {
+        case 0:
+            rgblight_setrgb (0x00,  0x00, 0xFF);
+            break;
+        case 1:
+            rgblight_setrgb (0x00, 0xFF, 0x7A);
+            break;
+        case 2:
+            rgblight_setrgb (0x00,  0xFF, 0x00);
+            break;
+        case 3:
+            rgblight_setrgb (0x7A,  0x00, 0xFF);
+            break;
+        case 4:
+            rgblight_setrgb (0x00, 0x7A, 0xFF);
+            break;
+        case 5:
+            rgblight_setrgb (0xFF, 0x00, 0x00 );
+            break;
+        default: //  for any other layers, or the default layer
+            rgblight_setrgb (0x00,  0x00, 0x00);
+            break;
+    }
+
+
+}
 
 
 
