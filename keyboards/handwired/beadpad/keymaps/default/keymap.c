@@ -13,44 +13,55 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <print.h>
 #include QMK_KEYBOARD_H
 
 
 
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    /* TODO - can this be a function? i.e. can i use a const max layer and toggles based on that */
-    [0] = LAYOUT(
-        TO(1),       KC_1,      KC_2,       KC_3,      KC_4
-    ),
-    [1] = LAYOUT(
-        TO(2),       KC_5,      KC_6,       KC_7,      KC_8
-    ),
-    [2] = LAYOUT(
-        TO(3),       KC_9,      KC_0,       KC_Q,      KC_W
-    ),
-    [3] = LAYOUT(
-        TO(4),       S(KC_1),      S(KC_2),       S(KC_3),      S(KC_4)
-    ),
-    [4] = LAYOUT(
-        TO(5),       S(KC_5),      S(KC_6),       S(KC_7),      S(KC_8)
-    ),
-    [5] = LAYOUT(
-        TO(0),       S(KC_9),      S(KC_0),       S(KC_Q),      S(KC_W)
-    )
 
-};
+// const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+//     /* TODO - can this be a function? i.e. can i use a const max layer and toggles based on that */
+//     [0] = LAYOUT(
+//         TO(1),       KC_1,      KC_2,       KC_3,      KC_4
+//     ),
+//     [1] = LAYOUT(
+//         TO(2),       KC_5,      KC_6,       KC_7,      KC_8
+//     ),
+//     [2] = LAYOUT(
+//         TO(3),       KC_9,      KC_0,       KC_Q,      KC_W
+//     ),
+//     [3] = LAYOUT(
+//         TO(4),       S(KC_1),      S(KC_2),       S(KC_3),      S(KC_4)
+//     ),
+//     [4] = LAYOUT(
+//         TO(5),       S(KC_5),      S(KC_6),       S(KC_7),      S(KC_8)
+//     ),
+//     [5] = LAYOUT(
+//         TO(0),       S(KC_9),      S(KC_0),       S(KC_Q),      S(KC_W)
+//     )
+
+// };
 
 /*
 
 
 for encoder, we could reserve f22/23/24
 
-f22 is ccw
-f23 is button
-f2 is cw
 
 
+0 = no mod
+1 = ctrl
+2 = alt
+3 = win
+4 = ctrl+alt
+5 = ctrl+win
+6 = alt+win
+7 = ctrl+alt+win
 
+
+hanlde everything as custom kc for bp1m bp2 etc
+then add layer based modifiers
+this could be a function so that rotary encoder does it too
 
 
 
@@ -72,42 +83,73 @@ f2 is cw
 //do we need current_layer, can we not just do get_highest_layer(layer_state)
 //this also solves thr problem of know what boot status is
 // static uint8_t current_layer = 0;
-
-#define MAX_LAYER = 3 // number of layers to switch through
-
-
+*/
+#define HIGHEST_LAYER 4 // number of layers to switch through
+//todo - make sure this number isn't higher than the number of layers supported
 
 enum my_keycodes {
   MODE = SAFE_RANGE,
+  KEY1,
+  KEY2,
+  KEY3,
+  KEY4,
+  KEY5
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+
     [0] = LAYOUT(
-        MODE,       KC_F13,      KC_F14,       KC_F15,      KC_F16
+        MODE,       KC_1,      KC_2,       KC_3,      KC_4
     ),
     [1] = LAYOUT(
-        MODE,       KC_F17,      KC_F18,       KC_F19,      KC_F20
+        MODE,       KC_5,      KC_6,       KC_7,      KC_8
     ),
     [2] = LAYOUT(
-        MODE,       KC_F21,      KC_F22,       KC_F23,      KC_F24
+        MODE,       KC_9,      KC_0,       KC_Q,      KC_W
     ),
     [3] = LAYOUT(
-        MODE,       C(KC_F13),      C(KC_F14),       C(KC_F15),      C(KC_F16)
+        TO(4),       S(KC_1),      S(KC_2),       S(KC_3),      S(KC_4)
     ),
     [4] = LAYOUT(
-        MODE,       C(KC_F17),      C(KC_F18),       C(KC_F19),      C(KC_F20)
+        MODE,       S(KC_5),      S(KC_6),       S(KC_7),      S(KC_8)
     ),
     [5] = LAYOUT(
-        MODE,       C(KC_F21),      C(KC_F22),       C(KC_F23),      C(KC_F24)
+        MODE,       S(KC_9),      S(KC_0),       S(KC_Q),      S(KC_W)
     )
 
 };
 
+// const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+//     [0] = LAYOUT(
+//         MODE,       KC_F13,      KC_F14,       KC_F15,      KC_F16
+//     ),
+//     [1] = LAYOUT(
+//         MODE,       KC_F17,      KC_F18,       KC_F19,      KC_F20
+//     ),
+//     [2] = LAYOUT(
+//         MODE,       KC_F21,      KC_F22,       KC_F23,      KC_F24
+//     ),
+//     [3] = LAYOUT(
+//         MODE,       C(KC_F13),      C(KC_F14),       C(KC_F15),      C(KC_F16)
+//     ),
+//     [4] = LAYOUT(
+//         MODE,       C(KC_F17),      C(KC_F18),       C(KC_F19),      C(KC_F20)
+//     ),
+//     [5] = LAYOUT(
+//         MODE,       C(KC_F21),      C(KC_F22),       C(KC_F23),      C(KC_F24)
+//     )
+
+// };
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+
+    uprintf("KEY EVENT");
+    uprintf("layer_state: %u\n", layer_state);
+
   switch (keycode) {
     case MODE:
       if (record->event.pressed) {
-          layer_move(get_highest_layer(state) % HIGHEST_LAYER)
+          layer_move((get_highest_layer(layer_state) + 1) % HIGHEST_LAYER);
       }
       return false; // Skip all further processing of this key
     default:
@@ -115,15 +157,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
 }
 
-//#ifdef RGB_DI_PIN
+#ifdef RGB_DI_PIN
 layer_state_t layer_state_set_user(layer_state_t state) {
-
-    switch (get_highest_layer(state)) {
+    uprintf("SET STATE");
+    uprintf("layer_state: %u\n", layer_state);
+    uprintf("state: %u\n", state);
+    switch (get_highest_layer(layer_state)) {
         case 0:
             rgblight_setrgb (0x00,  0x00, 0xFF);
             break;
         case 1:
-            rgblight_setrgb (0xFF,  0x00, 0x00);
+            rgblight_setrgb (0x00, 0xFF, 0x7A);
             break;
         case 2:
             rgblight_setrgb (0x00,  0xFF, 0x00);
@@ -135,7 +179,7 @@ layer_state_t layer_state_set_user(layer_state_t state) {
             rgblight_setrgb (0x00, 0x7A, 0xFF);
             break;
         case 5:
-            rgblight_setrgb (0x00, 0xFF, 0x7A);
+            rgblight_setrgb (0xFF, 0x00, 0x00 );
             break;
         default: //  for any other layers, or the default layer
             rgblight_setrgb (0x00,  0x00, 0x00);
@@ -145,22 +189,22 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     return state;
 }
 #endif
-*/
 
 
 
 
 
-#ifdef ENCODER_ENABLE
-void encoder_update_user(uint8_t index, bool clockwise) {
-    //TODO - this needs to respond to whichever layer is active
-    if (clockwise) {
-        tap_code(KC_VOLU);
-    } else {
-        tap_code(KC_VOLD);
-    }
-}
-#endif
+
+// #ifdef ENCODER_ENABLE
+// void encoder_update_user(uint8_t index, bool clockwise) {
+//     //TODO - this needs to respond to whichever layer is active
+//     if (clockwise) {
+//         tap_code(KC_VOLU);
+//     } else {
+//         tap_code(KC_VOLD);
+//     }
+// }
+// #endif
 
 //todo - light indicating mode
 //ifdef rgbendable
