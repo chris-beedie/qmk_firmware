@@ -84,7 +84,7 @@ this could be a function so that rotary encoder does it too
 //this also solves thr problem of know what boot status is
 // static uint8_t current_layer = 0;
 */
-#define HIGHEST_LAYER 4 // number of layers to switch through
+#define HIGHEST_LAYER 6 // number of layers to switch through
 //todo - make sure this number isn't higher than the number of layers supported
 
 enum my_keycodes {
@@ -96,28 +96,63 @@ enum my_keycodes {
   KEY5
 };
 
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+#define HSV_MODE_0 191, 255, 100 //purple
+#define HSV_MODE_1 0, 255, 100 //red
+#define HSV_MODE_2 85, 255, 100 //green
+#define HSV_MODE_3 128, 255, 100 //cyan
+#define HSV_MODE_4 170, 255, 100 //blue
+#define HSV_MODE_5 43, 255, 100 //yellow
 
-    [0] = LAYOUT(
-        MODE,       KC_1,      KC_2,       KC_3,      KC_4
-    ),
-    [1] = LAYOUT(
-        MODE,       KC_5,      KC_6,       KC_7,      KC_8
-    ),
-    [2] = LAYOUT(
-        MODE,       KC_9,      KC_0,       KC_Q,      KC_W
-    ),
-    [3] = LAYOUT(
-        MODE,       S(KC_1),      S(KC_2),       S(KC_3),      S(KC_4)
-    ),
-    [4] = LAYOUT(
-        MODE,       S(KC_5),      S(KC_6),       S(KC_7),      S(KC_8)
-    ),
-    [5] = LAYOUT(
-        MODE,       S(KC_9),      S(KC_0),       S(KC_Q),      S(KC_W)
-    )
+void update_mode_hsv(uint8_t mode) {
 
-};
+    switch (mode) {
+       case 0:
+            rgblight_sethsv_noeeprom(HSV_MODE_0);
+            break;
+        case 1:
+            rgblight_sethsv_noeeprom(HSV_MODE_1);
+            break;
+        case 2:
+            rgblight_sethsv_noeeprom(HSV_MODE_2);
+            break;
+        case 3:
+            rgblight_sethsv_noeeprom(HSV_MODE_3);
+            break;
+        case 4:
+            rgblight_sethsv_noeeprom(HSV_MODE_4);
+            break;
+        case 5:
+            rgblight_sethsv_noeeprom(HSV_MODE_5);
+            break;
+        default: //  for any other layers, or the default layer
+            rgblight_sethsv_noeeprom(0,0,0);
+            break;
+    }
+
+}
+
+// const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+
+//     [0] = LAYOUT(
+//         MODE,       KC_1,      KC_2,       KC_3,      KC_4
+//     ),
+//     [1] = LAYOUT(
+//         MODE,       KC_5,      KC_6,       KC_7,      KC_8
+//     ),
+//     [2] = LAYOUT(
+//         MODE,       KC_9,      KC_0,       KC_Q,      KC_W
+//     ),
+//     [3] = LAYOUT(
+//         MODE,       S(KC_1),      S(KC_2),       S(KC_3),      S(KC_4)
+//     ),
+//     [4] = LAYOUT(
+//         MODE,       S(KC_5),      S(KC_6),       S(KC_7),      S(KC_8)
+//     ),
+//     [5] = LAYOUT(
+//         MODE,       S(KC_9),      S(KC_0),       S(KC_Q),      S(KC_W)
+//     )
+
+// };
 
 // const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //     [0] = LAYOUT(
@@ -141,10 +176,33 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 // };
 
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+
+    [0] = LAYOUT(
+        MODE,       RGB_HUI,      RGB_HUD,       RGB_SAI,      RGB_SAD
+    ),
+    [1] = LAYOUT(
+        MODE,       KC_TRNS,      KC_TRNS,       KC_TRNS,      KC_TRNS
+    ),
+    [2] = LAYOUT(
+        MODE,       KC_TRNS,      KC_TRNS,       KC_TRNS,      KC_TRNS
+    ),
+    [3] = LAYOUT(
+        MODE,       KC_TRNS,      KC_TRNS,       KC_TRNS,      KC_TRNS
+    ),
+    [4] = LAYOUT(
+        MODE,       KC_TRNS,      KC_TRNS,       KC_TRNS,      KC_TRNS
+    ),
+    [5] = LAYOUT(
+        MODE,       KC_TRNS,      KC_TRNS,       KC_TRNS,      KC_TRNS
+    )
+
+};
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
-    // uprintf("\nKEY EVENT\n");
-    // uprintf("layer_state: %u\n", get_highest_layer(layer_state));
+     uprintf("\nKEY EVENT\n");
+     uprintf("layer_state: %u\n", get_highest_layer(layer_state));
 
   switch (keycode) {
     case MODE:
@@ -157,82 +215,37 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         layer_move(new_layer);
 
-        // uprintf("layer should be: %u\n", new_layer);
-        // uprintf("layer is now: %u\n", get_highest_layer(layer_state));
+         uprintf("layer should be: %u\n", new_layer);
+         uprintf("layer is now: %u\n", get_highest_layer(layer_state));
       }
       return false; // Skip all further processing of this key
     default:
-      uprintf("key pressed: %u\n", keycode);
+      uprintf("HSV: %u, %u, %u\n", keycode);
       return true; // Process all other keycodes normally
   }
 }
 
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-    uprintf("\nSET STATE\n");
-    // uprintf("layer_state: %u\n", get_highest_layer(layer_state));
-    // uprintf("state: %u\n", get_highest_layer(state));
-    switch (get_highest_layer(layer_state)) {
-        case 0:
-            rgblight_setrgb (0x00,  0x00, 0xFF);
-            break;
-        case 1:
-            rgblight_setrgb (0x00, 0xFF, 0x7A);
-            break;
-        case 2:
-            rgblight_setrgb (0x00,  0xFF, 0x00);
-            break;
-        case 3:
-            rgblight_setrgb (0x7A,  0x00, 0xFF);
-            break;
-        case 4:
-            rgblight_setrgb (0x00, 0x7A, 0xFF);
-            break;
-        case 5:
-            rgblight_setrgb (0xFF, 0x00, 0x00 );
-            break;
-        default: //  for any other layers, or the default layer
-            rgblight_setrgb (0x00,  0x00, 0x00);
-            break;
-    }
+    uprintf("\nSET STATE!!\n");
+     //uprintf("layer_state: %u\n", get_highest_layer(layer_state));
+     //uprintf("state: %u\n", get_highest_layer(state));
+
+    update_mode_hsv(get_highest_layer(state));
 
     return state;
 }
 
 void keyboard_post_init_user(void) {
-  rgblight_setrgb (0x00, 0xFF, 0x7A);
-  uprintf("hello");
+
+    rgblight_enable_noeeprom(); // enables Rgb, without saving settings
+  //rgblight_sethsv_noeeprom(HSV_LAYER_5); // sets the color to teal/cyan without saving
+//rgblight_setrgb (0x00,  0x00, 0xFF);
+    update_mode_hsv(get_highest_layer(layer_state));
 }
 
 
-void update_mode_led(void) {
 
- switch (get_highest_layer(layer_state)) {
-        case 0:
-            rgblight_setrgb (0x00,  0x00, 0xFF);
-            break;
-        case 1:
-            rgblight_setrgb (0x00, 0xFF, 0x7A);
-            break;
-        case 2:
-            rgblight_setrgb (0x00,  0xFF, 0x00);
-            break;
-        case 3:
-            rgblight_setrgb (0x7A,  0x00, 0xFF);
-            break;
-        case 4:
-            rgblight_setrgb (0x00, 0x7A, 0xFF);
-            break;
-        case 5:
-            rgblight_setrgb (0xFF, 0x00, 0x00 );
-            break;
-        default: //  for any other layers, or the default layer
-            rgblight_setrgb (0x00,  0x00, 0x00);
-            break;
-    }
-
-
-}
 
 
 
