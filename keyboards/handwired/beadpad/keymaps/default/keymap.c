@@ -14,6 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 //TODO - remove print import and cleanup
+//TODO - refactor some of this to *_kb
+
 #include <print.h>
 #include QMK_KEYBOARD_H
 
@@ -23,49 +25,59 @@
 #define HSV_MODE_0 191, 255, 100 //purple
 #define HSV_MODE_1 0, 255, 100 //red
 #define HSV_MODE_2 85, 255, 100 //green
-#define HSV_MODE_3 128, 255, 100 //cyan
-#define HSV_MODE_4 170, 255, 100 //blue
-#define HSV_MODE_5 43, 255, 100 //yellow
 
-enum my_keycodes {
-  MODE = SAFE_RANGE,
-  KEY1,
-  KEY2,
-  KEY3,
-  KEY4,
-  KEY5
-};
 
-void update_mode_hsv(uint8_t mode) {
 
-    switch (mode) {
-        case 0:
-            rgblight_sethsv_noeeprom(HSV_MODE_0);
-            break;
-        case 1:
-            rgblight_sethsv_noeeprom(HSV_MODE_1);
-            break;
-        case 2:
-            rgblight_sethsv_noeeprom(HSV_MODE_2);
-            break;
-        case 3:
-            rgblight_sethsv_noeeprom(HSV_MODE_3);
-            break;
-        case 4:
-            rgblight_sethsv_noeeprom(HSV_MODE_4);
-            break;
-        case 5:
-            rgblight_sethsv_noeeprom(HSV_MODE_5);
-            break;
-        default:
-            rgblight_sethsv_noeeprom(0,0,0);
-            break;
-    }
 
-}
 
-void set_mode_mods(uint8_t mode, bool press) {
-    //press/release all mods based on layer
+
+
+
+
+
+
+//TODO define elswhere up to a maximum number
+#define HSV_DEFAULT_MODE_0 191, 255, 255 //purple
+#define HSV_DEFAULT_MODE_1 0, 255, 255 //red
+#define HSV_DEFAULT_MODE_2 85, 255, 255 //green
+#define HSV_DEFAULT_MODE_3 128, 255, 100 //cyan
+#define HSV_DEFAULT_MODE_4 170, 255, 100 //blue
+#define HSV_DEFAULT_MODE_5 43, 255, 100 //yellow
+
+#ifndef HSV_MODE_3
+#define HSV_MODE_3 HSV_DEFAULT_MODE_3
+#endif
+#ifndef HSV_MODE_4
+#define HSV_MODE_4 HSV_DEFAULT_MODE_4
+#endif
+#ifndef HSV_MODE_5
+#define HSV_MODE_5 HSV_DEFAULT_MODE_5
+#endif
+#ifndef HSV_MODE_6
+#define HSV_MODE_6 HSV_DEFAULT_MODE_6
+#endif
+
+
+
+//TODO - long press of mode goes down
+
+
+static uint8_t current_mode;
+static uint16_t current_modifiers;
+
+#define KEY1 KC_1
+#define KEY2 KC_2
+#define KEY3 KC_3
+#define KEY4 KC_4
+
+#define MOD_MODE_0 KC_NO
+#define MOD_MODE_1 QK_LSFT
+#define MOD_MODE_2 QK_LCTL
+#define MOD_MODE_3 QK_LALT
+#define MOD_MODE_4 QK_LGUI
+#define MOD_MODE_5 (QK_LCTL | QK_LALT)
+#define MOD_MODE_6 (QK_LCTL | QK_LGUI)
+#define MOD_MODE_7 (QK_LCTL | QK_LALT | QK_LGUI)
 
 // 0 = no mod
 // 1 = ctrl
@@ -75,89 +87,112 @@ void set_mode_mods(uint8_t mode, bool press) {
 // 5 = ctrl+win
 // 6 = alt+win
 // 7 = ctrl+alt+win
+
+
+/*
+  KC_LCTRL = 0xE0,
+    KC_LSHIFT,
+    KC_LALT,
+    KC_LGUI,
+    KC_RCTRL,
+    KC_RSHIFT,
+    KC_RALT,
+    KC_RGUI
+
+    */
+
+enum my_keycodes {
+  MODE = SAFE_RANGE,
+  KEY1a,
+  KEY2b,
+  KEY3c,
+  KEY4d
+};
+
+void set_mode(uint8_t mode) {
+
+    current_mode = mode;
+
+    switch (current_mode) {
+        case 0:
+            rgblight_sethsv_noeeprom(HSV_MODE_0);
+            current_modifiers = MOD_MODE_0;
+            break;
+        case 1:
+            rgblight_sethsv_noeeprom(HSV_MODE_1);
+            current_modifiers = MOD_MODE_1;
+            break;
+        case 2:
+            rgblight_sethsv_noeeprom(HSV_MODE_2);
+            current_modifiers = MOD_MODE_2;
+            break;
+        case 3:
+            rgblight_sethsv_noeeprom(HSV_MODE_3);
+            current_modifiers = MOD_MODE_3;
+            break;
+        case 4:
+            rgblight_sethsv_noeeprom(HSV_MODE_4);
+            current_modifiers = MOD_MODE_4;
+            break;
+        case 5:
+            rgblight_sethsv_noeeprom(HSV_MODE_5);
+            current_modifiers = MOD_MODE_5;
+            break;
+        default:
+            rgblight_sethsv_noeeprom(0,0,0);
+            current_modifiers = KC_NO;
+            break;
+    }
+
 }
 
-// const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
-//     [0] = LAYOUT(
-//         MODE,       KC_1,      KC_2,       KC_3,      KC_4
-//     ),
-//     [1] = LAYOUT(
-//         MODE,       KC_5,      KC_6,       KC_7,      KC_8
-//     ),
-//     [2] = LAYOUT(
-//         MODE,       KC_9,      KC_0,       KC_Q,      KC_W
-//     ),
-//     [3] = LAYOUT(
-//         MODE,       S(KC_1),      S(KC_2),       S(KC_3),      S(KC_4)
-//     ),
-//     [4] = LAYOUT(
-//         MODE,       S(KC_5),      S(KC_6),       S(KC_7),      S(KC_8)
-//     ),
-//     [5] = LAYOUT(
-//         MODE,       S(KC_9),      S(KC_0),       S(KC_Q),      S(KC_W)
-//     )
 
-// };
+void press_mode_kc(uint16_t keycode) {
+    uprintf("modifiers: %u\tkeycode: %u\n", current_modifiers,keycode);
+    register_code16(current_modifiers);
+    tap_code(keycode);
+    unregister_code16(current_modifiers);
+}
 
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-
-    [0] = LAYOUT( MODE, KEY1,    KEY2,    KEY3,    KEY4    ),
-    [1] = LAYOUT( MODE, _______, _______, _______, _______ ),
-    [2] = LAYOUT( MODE, _______, _______, _______, _______ ),
-    [3] = LAYOUT( MODE, _______, _______, _______, _______ ),
-    [4] = LAYOUT( MODE, _______, _______, _______, _______ ),
-    [5] = LAYOUT( MODE, _______, _______, _______, _______ )
-
+    [0] = LAYOUT( MODE, KEY1, KEY2, KEY3, KEY4)
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
-    uprintf("\nKEY EVENT\n");
-    uprintf("layer_state: %u\n", get_highest_layer(layer_state));
+    if (record->event.pressed) {
+        uprintf("\nKEY EVENT\n");
+        uprintf("current_mode: %u\n", current_mode);
+    }
 
     switch (keycode) {
         case MODE:
             if (record->event.pressed) {
-            uint8_t new_layer = (get_highest_layer(layer_state) + 1) % MODES;
+                set_mode((current_mode + 1) % MODES);
 
-            layer_move(new_layer);
-
-            uprintf("layer should be: %u\n", new_layer);
-            uprintf("layer is now: %u\n", get_highest_layer(layer_state));
-            }
-            return false; // Skip all further processing of this key
-        case KEY1 ... KEY3:
-            if (record->event.pressed) {
-                uprintf("keycode: %u\n", keycode);
+                uprintf("new mode: %u\n", current_mode);
             }
             return false;
-        case KEY4:
+        case KEY1 ... KEY4:
             if (record->event.pressed) {
-                uprintf("key 4 is go");
+
+                press_mode_kc(keycode);
+
             }
             return false;
         default:
-            uprintf("HSV: %u, %u, %u\n", keycode);
+            uprintf("INVALID KEY\n");
             return true; // Process all other keycodes normally
     }
 }
 
-
-layer_state_t layer_state_set_user(layer_state_t state) {
-    uprintf("\nSET STATE!!\n");
-     //uprintf("layer_state: %u\n", get_highest_layer(layer_state));
-     //uprintf("state: %u\n", get_highest_layer(state));
-
-    update_mode_hsv(get_highest_layer(state));
-
-    return state;
-}
-
 void keyboard_post_init_user(void) {
+    //TODO - read/write value in eeprom to remember last mode - https://beta.docs.qmk.fm/using-qmk/guides/custom_quantum_functions#persistent-configuration-eeprom
+
     rgblight_enable_noeeprom(); // enables Rgb, without saving settings
-    update_mode_hsv(get_highest_layer(layer_state));
+    set_mode(0);
 }
 
 
