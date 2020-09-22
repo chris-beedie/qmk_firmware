@@ -68,5 +68,5 @@
 //##########################################################################################################################
 //things you probably shouldn't be changing
 
-//all the code for managing the modes is in the
+//all the code for managing the modes is in the mode.c file
 #include "mode.c"
