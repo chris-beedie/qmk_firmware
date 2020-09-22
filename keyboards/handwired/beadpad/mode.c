@@ -1,12 +1,7 @@
-//TODO - remove print import and cleanup
-//TODO - make sure MODES isn't higher than the number of modes supported
 //TODO - long press of mode goes down
 //TODO - option to use depressed rotary encoder to flick through layers?
 //TODO - eeprom to store/load last mode
-//TODO add encoder button to matrix or at least as direct switch
-//TODO add more infor to readme
-
-
+//TODO - update readme
 
 
 //mode count check
