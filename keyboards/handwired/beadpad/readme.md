@@ -5,6 +5,8 @@
 
 A five key macropad with rotary encoder inspired by the Pikatea, intended to be used with a dedicated 'mode' button and keyhook running on the pc (e.g. python keyboard or pynput)
 
+Example keyhook repo to come.
+
 Keyboard Maintainer: [chris-beedie](https://github.com/chris-beedie)  
 Hardware Supported: handwired, elite-c  
 

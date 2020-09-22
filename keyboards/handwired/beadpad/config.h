@@ -31,35 +31,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MATRIX_ROWS 1
 #define MATRIX_COLS 6
 
-/*
- * Keyboard Matrix Assignments
- *
- * Change this to how you wired your keyboard
- * COLS: AVR pins used for columns, left to right
- * ROWS: AVR pins used for rows, top to bottom
- * DIODE_DIRECTION: COL2ROW = COL = Anode (+), ROW = Cathode (-, marked on diode)
- *                  ROW2COL = ROW = Anode (+), COL = Cathode (-, marked on diode)
- *
-*/
 #define MATRIX_ROW_PINS { F7 }
 #define MATRIX_COL_PINS { C6, D7, B5, B4, E6, D1 }
 #define UNUSED_PINS
 
-/* COL2ROW, ROW2COL */
 #define DIODE_DIRECTION COL2ROW
 
 #define RGB_DI_PIN B6
-//#ifdef RGB_DI_PIN
-//#define RGBLIGHT_ANIMATIONS
 #define RGBLED_NUM 1
-//#define RGBLIGHT_HUE_STEP 1
-//#define RGBLIGHT_SAT_STEP 8
-//#define RGBLIGHT_VAL_STEP 8
-//todo clean up
 #define RGBLIGHT_SLEEP
-//#endif
 
-/* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
 #define DEBOUNCE 5
 
 #define ENCODERS_PAD_A { D0 }

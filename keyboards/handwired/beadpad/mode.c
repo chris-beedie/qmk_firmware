@@ -2,7 +2,7 @@
 //TODO - option to use depressed rotary encoder to flick through layers?
 //TODO - eeprom to store/load last mode
 //TODO - update readme
-
+//TODO - update info.json
 
 //mode count check
 #if MODES > 10
@@ -115,43 +115,3 @@ void encoder_update_user(uint8_t index, bool clockwise) {
         keypress(ROT_CCW);
     }
 }
-
-
-
-
-
-
-// void encoder_update_user(uint8_t index, bool clockwise) {
-
-//     switch (get_highest_layer(layer_state)) {
-//         case 0:
-
-//             break;
-//         case 1:
-
-//             break;
-//         case 2:
-
-//             break;
-//         case 3:
-
-//             break;
-//         case 4:
-
-//             break;
-//         case 5:
-
-//             break;
-//         default: //  for any other layers, or the default layer
-//             break;
-//     }
-
-
-//     if (clockwise) {
-//         tap_code(KC_VOLU);
-//     } else {
-//         tap_code(KC_VOLD);
-//     }
-// }
-
-
