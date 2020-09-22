@@ -1,7 +1,7 @@
 # beadpad
 
 
-![beadpad](https://https://i.imgur.com/5WW0r3u.jpg)
+![beadpad](https://i.imgur.com/5WW0r3u.jpg)
 
 A five key macropad with rotary encoder inspired by the Pikatea, intended to be used with a dedicated 'mode' button and keyhook running on the pc (e.g. python keyboard or pynput)
 
