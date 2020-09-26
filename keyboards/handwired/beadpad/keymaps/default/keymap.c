@@ -21,52 +21,45 @@
 //things you will want to change
 
 
-//How many modes (Max=10)?
-#define MODES 10 // number of modes to switch through
+//How many modes? (Max=8)
+#define MODES 8 // number of modes to switch through
 
-//indicator colour for each mode, all 10 need to be defined even if not in use
+//indicator colour for each mode, all 8 need to be defined even if not in use
 #define HSV_MODE_0 0,   255, 100
-#define HSV_MODE_1 25,  255, 100
-#define HSV_MODE_2 50,  255, 100
-#define HSV_MODE_3 75,  255, 100
-#define HSV_MODE_4 100, 255, 100
-#define HSV_MODE_5 125, 255, 100
-#define HSV_MODE_6 150, 255, 100
-#define HSV_MODE_7 175, 255, 100
-#define HSV_MODE_8 200, 255, 100
-#define HSV_MODE_9 225, 255, 100
+#define HSV_MODE_1 30,  255, 100
+#define HSV_MODE_2 60,  255, 100
+#define HSV_MODE_3 90,  255, 100
+#define HSV_MODE_4 120, 255, 100
+#define HSV_MODE_5 150, 255, 100
+#define HSV_MODE_6 180, 255, 100
+#define HSV_MODE_7 210, 255, 100
+
 
 
 
 //##########################################################################################################################
 //things you might want to change
 
-//what each key is mapped to
-#define KEY1 KC_1
-#define KEY2 KC_2
-#define KEY3 KC_3
-#define KEY4 KC_4
+//keys used to represent the control and status bits (should be keys that don't otherwise do anything)
+#define TERMINATOR KC_F24
 
-#define ROT_BUT KC_5
-#define ROT_CW  KC_6
-#define ROT_CCW KC_7
+#define MODE_BITS_SIZE 3
+const int MODE_BITS[MODE_BITS_SIZE] = {
+    KC_F23,
+    KC_F22,
+    KC_F21
+};
 
-
-//the modifiers for each layer (use qk codes to allow easy combos), all 10 need to be defined even if not in use
-#define MODS_MODE_0 KC_NO
-#define MODS_MODE_1 QK_LSFT
-#define MODS_MODE_2 QK_LCTL
-#define MODS_MODE_3 QK_LALT
-#define MODS_MODE_4 QK_LGUI
-#define MODS_MODE_5 (QK_LCTL | QK_LALT)
-#define MODS_MODE_6 (QK_LCTL | QK_LSFT)
-#define MODS_MODE_7 (QK_LCTL | QK_LGUI)
-#define MODS_MODE_8 (QK_LCTL | QK_LALT | QK_LSFT)
-#define MODS_MODE_9 (QK_LCTL | QK_LALT | QK_LGUI)
+#define KEY_BITS_SIZE 3
+const int KEY_BITS[KEY_BITS_SIZE] = {
+    KC_F20,
+    KC_F19,
+    KC_F18
+};
 
 
 //##########################################################################################################################
-//things you probably shouldn't be changing
+//things you shouldn't need to change
 
 //all the code for managing the modes is in the mode.c file
 #include "mode.c"

@@ -23,16 +23,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define VENDOR_ID       0xBEAD
 #define PRODUCT_ID      0xCDBD
 #define DEVICE_VER      0x0001
-#define MANUFACTURER    Chris Beedie
+#define MANUFACTURER    bead
 #define PRODUCT         beadpad
 #define DESCRIPTION     macropad
 
 /* key matrix size */
 #define MATRIX_ROWS 1
 #define MATRIX_COLS 6
+#define ENCODER_RESOLUTION 4
 
 #define MATRIX_ROW_PINS { F7 }
 #define MATRIX_COL_PINS { C6, D7, B5, B4, E6, D1 }
+#define ENCODERS_PAD_A { D0 }
+#define ENCODERS_PAD_B { D4 }
 #define UNUSED_PINS
 
 #define DIODE_DIRECTION COL2ROW
@@ -43,6 +46,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define DEBOUNCE 5
 
-#define ENCODERS_PAD_A { D0 }
-#define ENCODERS_PAD_B { D4 }
-#define ENCODER_RESOLUTION 4
+#define TAP_CODE_DELAY 0
+
+
