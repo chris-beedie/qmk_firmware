@@ -35,6 +35,28 @@
 #define HSV_MODE_7 210, 255, 100
 
 
+#define MODE_UP KEY1
+#define MODE_DOWN KEY2
+
+//not possible if using ROT_CW or ROT_CCW for MODE_UP
+//can still be used even with dedicated down button
+//#define MODE_LONG_PRESS 500
+//#define MODE_ROT_ADJUST_ENABLED
+
+//FEATURE - CHANGE MODE COLOURS OTF
+    //if you press and hold button 1 then press another button it gets set as ignored
+    //on button press we check if button 1 is down, if so we are in change colour mode.
+    //key 2/3 is sat
+    //key 4/5 is brightness
+    //rot is hue
+    //need to write to eeprom and read from eeprom on boot and have setttings here available after flash.
+
+//FEATURE - CHANGE MODES OTF
+    //for modes - press key1 and rot and twist rot -> shows binary indication
+    //need to write to eeprom and read from eeprom on boot and have setttings here available after flash.
+
+
+#define MODE_INDICATION MI_MODE_UP
 
 
 //##########################################################################################################################
@@ -42,20 +64,8 @@
 
 //keys used to represent the control and status bits (should be keys that don't otherwise do anything)
 #define TERMINATOR KC_F24
-
-#define MODE_BITS_SIZE 3
-const int MODE_BITS[MODE_BITS_SIZE] = {
-    KC_F23,
-    KC_F22,
-    KC_F21
-};
-
-#define KEY_BITS_SIZE 3
-const int KEY_BITS[KEY_BITS_SIZE] = {
-    KC_F20,
-    KC_F19,
-    KC_F18
-};
+#define MODE_BITS { KC_F23, KC_F22, KC_F21 }
+#define KEY_BITS  { KC_F20, KC_F19, KC_F18 }
 
 
 //##########################################################################################################################
@@ -63,3 +73,4 @@ const int KEY_BITS[KEY_BITS_SIZE] = {
 
 //all the code for managing the modes is in the mode.c file
 #include "mode.c"
+

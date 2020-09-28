@@ -17,6 +17,28 @@
 
 #include "quantum.h"
 
+enum KEY_BIT {
+    KEY1,
+    KEY2,
+    KEY3,
+    KEY4,
+    KEY5,
+    ROT_BUT,
+    ROT_CW,
+    ROT_CCW
+};
+
+enum MODE_INDICATION {
+    MI_NONE,
+    MI_MODE_UP,
+    MI_MODE_DOWN,
+    MI_MODE_UP_DOWN,
+    MI_ALL,
+    MI_BINARY,
+    MI_BINARY_COLOR
+};
+
+
 #define LAYOUT( \
     k00, k01, k02, k03, k04, k05  \
 ) \
