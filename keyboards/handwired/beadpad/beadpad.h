@@ -17,6 +17,8 @@
 
 #include "quantum.h"
 
+
+
 enum KEY_BIT {
     KEY1,
     KEY2,
@@ -38,6 +40,42 @@ enum MODE_INDICATION {
     MI_BINARY_COLOR
 };
 
+
+#define MAX_MODES 8
+#define KEY_COUNT 8
+#define MODE_BITS_SIZE 3
+#define KEY_BITS_SIZE 3
+
+#define SIZE_OF_BYTE 8
+
+#define HUE_PACK_BITS 7
+#define SAT_PACK_BITS 6
+#define VAL_PACK_BITS 3
+
+#define HUE_PACK_OFFSET (2*SIZE_OF_BYTE - HUE_PACK_BITS)
+#define SAT_PACK_OFFSET (2*SIZE_OF_BYTE - HUE_PACK_BITS - SAT_PACK_BITS)
+#define VAL_PACK_OFFSET (2*SIZE_OF_BYTE - HUE_PACK_BITS - SAT_PACK_BITS - VAL_PACK_BITS)
+
+
+
+
+#if HUE_PACK_BITS + SAT_PACK_BITS + VAL_PACK_BITS > 16
+#error HSV too big to pack
+#endif
+
+
+#define KEY_EDIT_HSV KEY1
+#define KEY_EDIT_HSV_SAD KEY2
+#define KEY_EDIT_HSV_SAI KEY3
+#define KEY_EDIT_HSV_VAD KEY4
+#define KEY_EDIT_HSV_VAI KEY5
+#define KEY_EDIT_HSV_HUD ROT_CW
+#define KEY_EDIT_HSV_HUI ROT_CCW
+
+
+#define KEY_EDIT_MODE_COUNT KEY2
+#define KEY_EDIT_MODE_COUNT_UP ROT_CW
+#define KEY_EDIT_MODE_COUNT_DOWN ROT_CCW
 
 #define LAYOUT( \
     k00, k01, k02, k03, k04, k05  \

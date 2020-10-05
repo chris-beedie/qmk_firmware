@@ -21,8 +21,13 @@
 //things you will want to change
 
 
+
+
+//on flash the number of modes and mode indicator colours will be set to what is defined below, to keep what is stored in the eeprom define PRESERVE_CUSTOMISATION
+//#define PRESERVE_CUSTOMISATION
+
 //How many modes? (Max=8)
-#define MODES 8 // number of modes to switch through
+#define MODE_COUNT 8 // number of modes to switch through
 
 //indicator colour for each mode, all 8 need to be defined even if not in use
 #define HSV_MODE_0 0,   255, 100
@@ -35,26 +40,25 @@
 #define HSV_MODE_7 210, 255, 100
 
 
+#define EDIT_HSV_ENABLE
+#define EDIT_MODE_COUNT_ENABLE
+
 #define MODE_UP KEY1
 #define MODE_DOWN KEY2
 
+
 //not possible if using ROT_CW or ROT_CCW for MODE_UP
 //can still be used even with dedicated down button
-//#define MODE_LONG_PRESS 500
-//#define MODE_ROT_ADJUST_ENABLED
+//#define MODE_HOLD_TERM 500
 
-//FEATURE - CHANGE MODE COLOURS OTF
-    //if you press and hold button 1 then press another button it gets set as ignored
-    //on button press we check if button 1 is down, if so we are in change colour mode.
-    //key 2/3 is sat
-    //key 4/5 is brightness
-    //rot is hue
-    //need to write to eeprom and read from eeprom on boot and have setttings here available after flash.
+#define MODE_UP_HOLD KEY3
+#define MODE_DOWN_HOLD KEY4
+
+//#define MODE_ROT_ADJUST_ENABLED
 
 //FEATURE - CHANGE MODES OTF
     //for modes - press key1 and rot and twist rot -> shows binary indication
     //need to write to eeprom and read from eeprom on boot and have setttings here available after flash.
-
 
 #define MODE_INDICATION MI_MODE_UP
 
