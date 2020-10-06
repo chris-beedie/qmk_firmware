@@ -115,6 +115,7 @@ void keyboard_post_init_kb(void) {
         eeprom_init_hsv(false);
     }
 
+
     mode_set(0);
 }
 

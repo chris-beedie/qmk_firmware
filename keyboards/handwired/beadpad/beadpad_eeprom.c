@@ -82,4 +82,4 @@ void eeprom_update_hsv(uint8_t mode, uint8_t hue, uint8_t sat, uint8_t val) {
     eeprom_update_word((uint16_t *) get_hsv_addr(mode), pack_hsv(hue, sat, val));
 }
 
-__attribute__((weak)) void eeprom_init_hsv(bool force) {  }
+//__attribute__((weak)) void eeprom_init_hsv(bool force) {  }
