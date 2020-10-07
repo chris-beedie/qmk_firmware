@@ -1,9 +1,10 @@
 #include "beadpad_eeprom.h"
 #include "buildinfo.h"
 
-#define BUILD_ADDR EECONFIG_SIZE
-#define MODE_COUNT_ADDR BUILD_ADDR + 2
-#define HSV_BASE_ADDR MODE_COUNT_ADDR + 1
+#define BUILD_ADDR              EECONFIG_SIZE
+#define MODE_COUNT_ADDR         BUILD_ADDR + 2
+#define MODE_INDICATION_ADDR    MODE_COUNT_ADDR + 1
+#define HSV_BASE_ADDR           MODE_INDICATION_ADDR + 1
 
 //build_id is used as a volatile to allow code to run post-flash
 //build_id is written during build (by rules.mk), taking the 16 least significant bits of the epoch
@@ -15,14 +16,6 @@ void eeprom_set_valid(bool valid) {
     if (eeprom_is_valid() != valid) {
         eeprom_update_word((uint16_t *)BUILD_ADDR, valid ? BUILD_ID : 0xFFFF);
     }
-}
-
-uint8_t eeprom_read_mode_count(void) {
-    return eeprom_read_byte((uint8_t *) MODE_COUNT_ADDR);
-}
-
-void eeprom_update_mode_count(uint8_t mode_count) {
-    eeprom_update_byte((uint8_t *) MODE_COUNT_ADDR, mode_count);
 }
 
 uint16_t get_hsv_addr(uint8_t mode) {
@@ -82,4 +75,18 @@ void eeprom_update_hsv(uint8_t mode, uint8_t hue, uint8_t sat, uint8_t val) {
     eeprom_update_word((uint16_t *) get_hsv_addr(mode), pack_hsv(hue, sat, val));
 }
 
-//__attribute__((weak)) void eeprom_init_hsv(bool force) {  }
+uint8_t eeprom_read_mode_indication(void) {
+    return eeprom_read_byte((uint8_t *) MODE_INDICATION_ADDR);
+}
+
+void eeprom_update_mode_indication(uint8_t mode_indication) {
+    eeprom_update_byte((uint8_t *) MODE_INDICATION_ADDR, mode_indication);
+}
+
+uint8_t eeprom_read_mode_count(void) {
+    return eeprom_read_byte((uint8_t *) MODE_COUNT_ADDR);
+}
+
+void eeprom_update_mode_count(uint8_t mode_count) {
+    eeprom_update_byte((uint8_t *) MODE_COUNT_ADDR, mode_count);
+}

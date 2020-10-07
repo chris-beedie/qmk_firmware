@@ -10,6 +10,13 @@
 //TODO - use *_kb functions and weakly define downstream funcs
 //TODO - comment
 
+//BUGS - no indication on boot
+//BUGS - does mode hold interfere?
+//BUGS - change of mode count doesn't seem to work - need to add lighting to it anyway
+
+//do we need to update lighting as the user changes edit setting?
+//is there a way to indicate mode hold has kicked in without getting in the way?
+
 //FEATURE - SPECIFY WHICH LEDS INDICATE STATE
 //FEATURE - BINARY MODE INDICATION
 
@@ -41,14 +48,20 @@ const int KEY_BITS_ARR[] = KEY_BITS ;
 
 uint16_t mode_hold_timer;
 
-void eeprom_init_hsv(bool force) {
+uint16_t key_mode_up = MODE_UP;
+uint16_t key_mode_down = MODE_DOWN;
 
-#ifdef PRESERVE_CUSTOMISATION
+void beadpad_eeprom_init(bool force) {
+
+    #ifdef PRESERVE_CUSTOMISATION
     if (!force)
         return;
-#endif
+    #endif
 
     if(force || !eeprom_is_valid()) {
+
+        eeprom_update_mode_count(MODE_COUNT);
+        eeprom_update_mode_indication(MODE_INDICATION);
 
         eeprom_update_hsv(0, HSV_MODE_0);
         eeprom_update_hsv(1, HSV_MODE_1);
@@ -59,33 +72,31 @@ void eeprom_init_hsv(bool force) {
         eeprom_update_hsv(6, HSV_MODE_6);
         eeprom_update_hsv(7, HSV_MODE_7);
 
-        eeprom_update_mode_count(MODE_COUNT);
-
         eeprom_set_valid(true);
     }
 
 }
 
 void send_keypress(uint16_t keycode) {
-   uprintf("keycode: %u\n", keycode);
+   //uprintf("keycode: %u\n", keycode);
 
     uint8_t input, bit;
 
     input = current_mode;
     for(bit = 0; bit < MODE_BITS_SIZE; ++bit, input >>= 1) {
-       uprintf("mode, bit %u:\t%u\t%u\n", bit, input & 1, MODE_BITS_ARR[bit]);
+       //uprintf("mode, bit %u:\t%u\t%u\n", bit, input & 1, MODE_BITS_ARR[bit]);
         if (input & 1)
             tap_code(MODE_BITS_ARR[bit]);
     }
     input = keycode;
     for(bit = 0; bit < KEY_BITS_SIZE; ++bit, input >>= 1) {
-       uprintf("key, bit %u:\t%u\t%u\n", bit, input & 1, KEY_BITS_ARR[bit]);
+       //uprintf("key, bit %u:\t%u\t%u\n", bit, input & 1, KEY_BITS_ARR[bit]);
         if (input & 1)
             tap_code(KEY_BITS_ARR[bit]);
     }
 
     tap_code(TERMINATOR);
-    uprintf("mode: %u\n", current_mode);
+    //uprintf("mode: %u\n", current_mode);
 }
 
 
@@ -93,32 +104,23 @@ void send_keypress(uint16_t keycode) {
 
 void handle_key(uint16_t keycode, bool pressed) {
 
+    if(keycode==KEY5 && pressed) {
+         uprintf("key5 new mode: %u, mode_indication: %u\n", current_mode, mode_indication);
+    }
 
-    // if(keycode == KEY4) {
-    //     for(uint16_t addr = EECONFIG_SIZE; addr < 0xFF; addr++ ) {
-    //         uint8_t *paddr = (uint8_t *)addr;
-    //         eeprom_update_byte(paddr, addr % 0xFF);
-    //         wait_ms(300);
-    //         uprintf("addr: %u, val: %u\n",addr, eeprom_read_byte(paddr));
-    //     }
-    // }
-
-    // if(keycode == KEY5) {
-    //     for(uint16_t addr = EECONFIG_SIZE; addr < 0xFF; addr++ ) {
-    //         uint8_t *paddr = (uint8_t *)addr;
-    //         //eeprom_update_byte(paddr, addr % 0xFF);
-    //         wait_ms(300);
-    //         uprintf("addr: %u, val: %u\n",addr, eeprom_read_byte(paddr));
-    //     }
-    // }
-
-    //if a key is active and it changes, then reset status and return
+    //if a key is active and it changes, then handle and return, this is used for editing eeprom
     if(keystate[keycode] == ACTIVE) {
         keystate[keycode] = NONE;
 
         #ifdef EDIT_HSV_ENABLE
         if (keycode == KEY_EDIT_HSV) {
             edit_hsv_exit();
+        }
+        #endif
+
+        #ifdef EDIT_MODE_INDICATION_ENABLE
+        if (keycode == KEY_EDIT_MODE_INDICATION) {
+            edit_mode_indication_exit();
         }
         #endif
 
@@ -150,30 +152,31 @@ void handle_key(uint16_t keycode, bool pressed) {
 
     } else {
 
-        //special case - set RGB for current layer
+        //special case - editing on the fly
         #ifdef EDIT_HSV_ENABLE
         if (keycode != KEY_EDIT_HSV && keystate[KEY_EDIT_HSV] != NONE) {
-
             edit_hsv_update(keycode);
-
             keystate[KEY_EDIT_HSV] = ACTIVE;
-            //edit_state = ES_HSV;
+            return;
+        }
+        #endif
 
+        #ifdef EDIT_MODE_INDICATION_ENABLE
+        if (keycode != KEY_EDIT_MODE_INDICATION && keystate[KEY_EDIT_MODE_INDICATION] != NONE) {
+            edit_mode_indication_update(keycode);
+            keystate[KEY_EDIT_MODE_INDICATION] = ACTIVE;
             return;
         }
         #endif
 
         #ifdef EDIT_MODE_COUNT_ENABLE
         if (keycode != KEY_EDIT_MODE_COUNT && keystate[KEY_EDIT_MODE_COUNT] != NONE) {
-
             edit_mode_count_update(keycode);
-
             keystate[KEY_EDIT_MODE_COUNT] = ACTIVE;
-            //edit_state = ES_HSV;
-
             return;
         }
         #endif
+
 
         //special case - mode hold
         #ifdef MODE_UP_HOLD

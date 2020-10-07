@@ -22,7 +22,6 @@
 #define MODE_BITS_SIZE 3
 #define KEY_BITS_SIZE 3
 
-
 #define KEY_EDIT_HSV KEY1
 #define KEY_EDIT_HSV_SAD KEY2
 #define KEY_EDIT_HSV_SAI KEY3
@@ -31,11 +30,13 @@
 #define KEY_EDIT_HSV_HUD ROT_CW
 #define KEY_EDIT_HSV_HUI ROT_CCW
 
+#define KEY_EDIT_MODE_INDICATION KEY2
+#define KEY_EDIT_MODE_INDICATION_UP ROT_CW
+#define KEY_EDIT_MODE_INDICATION_DOWN ROT_CCW
 
-#define KEY_EDIT_MODE_COUNT KEY2
+#define KEY_EDIT_MODE_COUNT KEY3
 #define KEY_EDIT_MODE_COUNT_UP ROT_CW
 #define KEY_EDIT_MODE_COUNT_DOWN ROT_CCW
-
 
 #define LAYOUT( \
     k00, k01, k02, k03, k04, k05  \
@@ -63,7 +64,7 @@ enum MODE_INDICATION {
     MI_ALL,
     MI_BINARY,
     MI_BINARY_COLOR
-};
+} mode_indication;
 
 enum keystate_t {
     NONE,
@@ -71,6 +72,8 @@ enum keystate_t {
     ACTIVE
 } keystate[KEY_COUNT];
 
+extern uint16_t key_mode_up;
+extern uint16_t key_mode_down;
 
 extern uint8_t mode_count;
 extern uint8_t current_mode;
@@ -81,5 +84,7 @@ void mode_decrement(void);
 
 void edit_hsv_update(uint16_t keycode);
 void edit_hsv_exit(void);
+void edit_mode_indication_update(uint16_t keycode);
+void edit_mode_indication_exit(void);
 void edit_mode_count_update(uint16_t keycode);
 void edit_mode_count_exit(void);

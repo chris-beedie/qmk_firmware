@@ -20,19 +20,67 @@ uint8_t mode_count = MAX_MODES;
 uint8_t current_mode = 0; //keep track of cuurent layer
 
 __attribute__((weak)) void handle_key(uint16_t keycode, bool pressed) {  }
-//__attribute__((weak)) void set_mode(uint8_t mode) {  }
 
 //mode operations ==================================================================================================================
+
+void set_binary_hsv(uint8_t bin_val, uint8_t hue, uint8_t sat, uint8_t val) {
+
+    uprintf("binary: %u\n", bin_val);
+
+    for(uint8_t bit = 0; bit < MODE_BITS_SIZE; ++bit, bin_val >>= 1) {
+        uprintf("binary, bit %u:\t%u\n", bit, bin_val & 1);
+        if (bin_val & 1)
+            rgblight_sethsv_at(hue, sat, val, MODE_BITS_SIZE - bit);
+        else
+            rgblight_sethsv_at(0, 0, 0, MODE_BITS_SIZE - bit);
+    }
+
+}
+
+
 
 // sets the mode - just a case of changin colour and setting the var
 void mode_set(uint8_t mode) {
 
     current_mode = mode;
+
+    uprintf("new mode: %u, mode_indication: %u\n", current_mode, mode_indication);
+    uprintf("key_mode_up: %u, key_mode_down: %u\n", key_mode_up, key_mode_down);
+
     HSV mode_hsv = eeprom_read_hsv(mode);
 
-    rgblight_sethsv_noeeprom(mode_hsv.h, mode_hsv.s, mode_hsv.v);
+    uprintf("h: %u,s: %u, v: %u\n", mode_hsv.h, mode_hsv.s, mode_hsv.v);
 
-    uprintf("new mode: %u\n", current_mode);
+    rgblight_sethsv_noeeprom(0,0,0);
+
+    switch (mode_indication) {
+        case MI_MODE_UP:
+            rgblight_sethsv_at(mode_hsv.h, mode_hsv.s, mode_hsv.v, key_mode_up);
+            break;
+        case MI_MODE_DOWN:
+            rgblight_sethsv_at(mode_hsv.h, mode_hsv.s, mode_hsv.v, key_mode_down);
+            break;
+        case MI_MODE_UP_DOWN:
+            rgblight_sethsv_at(mode_hsv.h, mode_hsv.s, mode_hsv.v, key_mode_up);
+            rgblight_sethsv_at(mode_hsv.h, mode_hsv.s, mode_hsv.v, key_mode_down);
+            break;
+        case MI_ALL:
+            rgblight_sethsv_noeeprom(mode_hsv.h, mode_hsv.s, mode_hsv.v);
+            break;
+        case MI_BINARY:
+            //set to white at brightness of current mode
+            set_binary_hsv(current_mode, 0, 0, mode_hsv.v);
+            break;
+        case MI_BINARY_COLOR:
+            set_binary_hsv(current_mode, mode_hsv.h, mode_hsv.s, mode_hsv.v);
+            break;
+        default:
+            break;
+    }
+
+
+
+
 }
 
 void mode_increment(void) {
@@ -79,6 +127,27 @@ void edit_hsv_exit(void) {
     eeprom_update_hsv(current_mode, rgblight_get_hue(), rgblight_get_sat(), rgblight_get_val());
 }
 
+void edit_mode_indication_update(uint16_t keycode) {
+
+        switch (keycode) {
+        case KEY_EDIT_MODE_INDICATION_UP:
+            if(mode_indication < MI_BINARY_COLOR)
+                mode_indication++;
+            break;
+        case KEY_EDIT_MODE_INDICATION_DOWN:
+            if(mode_indication > MI_NONE)
+                mode_indication--;
+            break;
+        default:
+            break;
+    }
+}
+
+void edit_mode_indication_exit(void) {
+    eeprom_update_mode_indication(mode_indication);
+    mode_set(current_mode);
+}
+
 void edit_mode_count_update(uint16_t keycode) {
 
         switch (keycode) {
@@ -104,7 +173,7 @@ void edit_mode_count_exit(void) {
 //qmk overrides ==================================================================================================================
 
 void eeconfig_init_kb() {
-   eeprom_init_hsv(true);
+   beadpad_eeprom_init(true);
 }
 
 void keyboard_post_init_kb(void) {
@@ -112,10 +181,11 @@ void keyboard_post_init_kb(void) {
     if (!eeconfig_is_enabled()) {
         eeconfig_init();
     } else {
-        eeprom_init_hsv(false);
+        beadpad_eeprom_init(false);
     }
 
-
+    mode_count = eeprom_read_mode_count();
+    mode_indication = eeprom_read_mode_indication();
     mode_set(0);
 }
 
