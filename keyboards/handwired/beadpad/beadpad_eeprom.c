@@ -1,3 +1,4 @@
+#include "eeprom.h"
 #include "beadpad_eeprom.h"
 #include "buildinfo.h"
 
@@ -30,7 +31,7 @@ uint16_t pack(uint8_t value, uint8_t bits, uint8_t offset) {
 
     //check operation above didn't cause an overflow
     if (_value < value)
-        _value = 0xFF;
+        _value = UINT8_MAX;
 
     //shift it until we are left with the desired number of bits and then reposition for packing
     return (_value >> (SIZE_OF_BYTE - bits)) << offset;
@@ -89,4 +90,14 @@ uint8_t eeprom_read_mode_count(void) {
 
 void eeprom_update_mode_count(uint8_t mode_count) {
     eeprom_update_byte((uint8_t *) MODE_COUNT_ADDR, mode_count);
+}
+
+#define DEBUG_ADDR 19
+
+uint8_t eeprom_read_debug(void) {
+    return eeprom_read_byte((uint8_t *) DEBUG_ADDR);
+}
+
+void eeprom_update_debug(uint8_t val) {
+    eeprom_update_byte((uint8_t *) DEBUG_ADDR, val);
 }

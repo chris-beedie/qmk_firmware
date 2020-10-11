@@ -41,17 +41,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DIODE_DIRECTION COL2ROW
 
 #define RGB_DI_PIN B6
-#define RGBLED_NUM 5
-#define RGBLIGHT_SLEEP
+// #define RGBLED_NUM 5
+// #define RGBLIGHT_SLEEP
 
 #define DEBOUNCE 5
 
 #define TAP_CODE_DELAY 0
 
-
-#define RGBLIGHT_HUE_STEP 2
-#define RGBLIGHT_SAT_STEP 4
-#define RGBLIGHT_VAL_STEP 32
 
 
 

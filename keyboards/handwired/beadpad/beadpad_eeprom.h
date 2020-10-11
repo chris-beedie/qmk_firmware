@@ -1,4 +1,5 @@
-
+#include "eeprom.h"
+#include "color.h"
 
 #define SIZE_OF_BYTE 8
 
@@ -33,6 +34,9 @@ uint8_t eeprom_read_mode_count(void);
 void eeprom_update_mode_count(uint8_t mode_count);
 
 
+uint8_t eeprom_read_debug(void);
+
+void eeprom_update_debug(uint8_t val);
 
 
 

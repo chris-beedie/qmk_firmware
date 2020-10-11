@@ -1,3 +1,5 @@
+
+
 # MCU name
 MCU = atmega32u4
 
@@ -24,7 +26,7 @@ SLEEP_LED_ENABLE = no       # Breathing sleep LED during USB suspend
 # if this doesn't work, see here: https://github.com/tmk/tmk_keyboard/wiki/FAQ#nkro-doesnt-work
 NKRO_ENABLE = yes            # USB Nkey Rollover
 BACKLIGHT_ENABLE = no       # Enable keyboard backlight functionality on B7 by default
-RGBLIGHT_ENABLE = yes        # Enable keyboard RGB underglow
+RGBLIGHT_ENABLE = no        # Enable keyboard RGB underglow
 MIDI_ENABLE = no            # MIDI support
 UNICODE_ENABLE = no         # Unicode
 BLUETOOTH_ENABLE = no       # Enable Bluetooth with the Adafruit EZ-Key HID
@@ -40,3 +42,6 @@ BUILD_ID := $(shell echo "$$(( $(EPOCH) & 0xFFFF ))" )
 
 $(shell echo '//auto-generated file - changes will be overwritten during build!' > $(THIS_DIR)/buildinfo.h)
 $(shell echo '#define BUILD_ID $(BUILD_ID)' >> $(THIS_DIR)/buildinfo.h)
+
+ SRC += color.c \
+		ws2812.c

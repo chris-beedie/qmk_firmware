@@ -45,22 +45,19 @@
 #define EDIT_MODE_COUNT_ENABLE
 
 
-#define MODE_UP KEY1
-#define MODE_DOWN KEY2
+#define KEY_MODE_UP KEY1
+#define KEY_MODE_DOWN KEY2
 
 
 //not possible if using ROT_CW or ROT_CCW for MODE_UP
 //can still be used even with dedicated down button
 //#define MODE_HOLD_TERM 500
 
-#define MODE_UP_HOLD KEY3
-#define MODE_DOWN_HOLD KEY4
+#define KEY_MODE_UP_HOLD KEY3
+#define KEY_MODE_DOWN_HOLD KEY4
 
 //#define MODE_ROT_ADJUST_ENABLED
 
-//FEATURE - CHANGE MODES OTF
-    //for modes - press key1 and rot and twist rot -> shows binary indication
-    //need to write to eeprom and read from eeprom on boot and have setttings here available after flash.
 
 #define MODE_INDICATION MI_MODE_UP
 
@@ -77,6 +74,6 @@
 //##########################################################################################################################
 //things you shouldn't need to change
 
-//all the code for managing the modes is in the mode.c file
-#include "mode.c"
+//include the library code that handles processing of these values.
+#include "beadpad_post.c"
 

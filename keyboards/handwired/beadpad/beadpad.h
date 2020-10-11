@@ -52,8 +52,8 @@ enum KEY_BIT {
     KEY4,
     KEY5,
     ROT_BUT,
-    ROT_CW,
-    ROT_CCW
+    ROT_CCW,
+    ROT_CW
 };
 
 enum MODE_INDICATION {
@@ -63,8 +63,10 @@ enum MODE_INDICATION {
     MI_MODE_UP_DOWN,
     MI_ALL,
     MI_BINARY,
-    MI_BINARY_COLOR
+
 } mode_indication;
+
+#define MI_LAST MI_BINARY
 
 enum keystate_t {
     NONE,
@@ -75,8 +77,12 @@ enum keystate_t {
 extern uint16_t key_mode_up;
 extern uint16_t key_mode_down;
 
-extern uint8_t mode_count;
-extern uint8_t current_mode;
+//extern uint8_t mode_count;
+extern uint8_t mode_current;
+
+void mode_set_indicator(uint8_t mode);
+void mode_increment_indicator(void);
+void mode_decrement_indicator(void);
 
 void mode_set(uint8_t mode);
 void mode_increment(void);

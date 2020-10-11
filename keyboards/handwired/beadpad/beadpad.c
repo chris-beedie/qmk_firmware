@@ -14,86 +14,78 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "beadpad.h"
+#include "beadpad_util.c"
 #include "beadpad_eeprom.c"
+#include "beadpad_led.c"
 
 uint8_t mode_count = MAX_MODES;
-uint8_t current_mode = 0; //keep track of cuurent layer
+uint8_t mode_current = 0; //keep track of current mode
+uint8_t mode_prev = 0;
 
 __attribute__((weak)) void handle_key(uint16_t keycode, bool pressed) {  }
 
 //mode operations ==================================================================================================================
 
-void set_binary_hsv(uint8_t bin_val, uint8_t hue, uint8_t sat, uint8_t val) {
-
-    uprintf("binary: %u\n", bin_val);
-
-    for(uint8_t bit = 0; bit < MODE_BITS_SIZE; ++bit, bin_val >>= 1) {
-        uprintf("binary, bit %u:\t%u\n", bit, bin_val & 1);
-        if (bin_val & 1)
-            rgblight_sethsv_at(hue, sat, val, MODE_BITS_SIZE - bit);
-        else
-            rgblight_sethsv_at(0, 0, 0, MODE_BITS_SIZE - bit);
-    }
-
-}
-
-
-
-// sets the mode - just a case of changin colour and setting the var
-void mode_set(uint8_t mode) {
-
-    current_mode = mode;
-
-    uprintf("new mode: %u, mode_indication: %u\n", current_mode, mode_indication);
-    uprintf("key_mode_up: %u, key_mode_down: %u\n", key_mode_up, key_mode_down);
+//set the mode indicator only, used when mode up/down hold is activated, but may need to be undone if an edit function overrides
+void mode_set_indicator(uint8_t mode) {
 
     HSV mode_hsv = eeprom_read_hsv(mode);
 
     uprintf("h: %u,s: %u, v: %u\n", mode_hsv.h, mode_hsv.s, mode_hsv.v);
 
-    rgblight_sethsv_noeeprom(0,0,0);
+    hsv_enable(false);
 
     switch (mode_indication) {
         case MI_MODE_UP:
-            rgblight_sethsv_at(mode_hsv.h, mode_hsv.s, mode_hsv.v, key_mode_up);
+            hsv_enable_at(key_mode_up,true);
             break;
         case MI_MODE_DOWN:
-            rgblight_sethsv_at(mode_hsv.h, mode_hsv.s, mode_hsv.v, key_mode_down);
+            hsv_enable_at(key_mode_down, true);
             break;
         case MI_MODE_UP_DOWN:
-            rgblight_sethsv_at(mode_hsv.h, mode_hsv.s, mode_hsv.v, key_mode_up);
-            rgblight_sethsv_at(mode_hsv.h, mode_hsv.s, mode_hsv.v, key_mode_down);
+            hsv_enable_at(key_mode_up,true);
+            hsv_enable_at(key_mode_down, true);
             break;
         case MI_ALL:
-            rgblight_sethsv_noeeprom(mode_hsv.h, mode_hsv.s, mode_hsv.v);
+            hsv_enable(true);
             break;
         case MI_BINARY:
-            //set to white at brightness of current mode
-            set_binary_hsv(current_mode, 0, 0, mode_hsv.v);
-            break;
-        case MI_BINARY_COLOR:
-            set_binary_hsv(current_mode, mode_hsv.h, mode_hsv.s, mode_hsv.v);
+            hsv_enable_binary(mode);
             break;
         default:
             break;
     }
 
-
-
-
+    hsv_set(mode_hsv.h, mode_hsv.s, mode_hsv.v);
 }
 
-void mode_increment(void) {
-    //sets mode by incrementing and calling function, using modulus to restart at 0 if we go beyond the last one
-    mode_set((current_mode + 1) % mode_count);
+// sets the mode - just a case of changin colour and setting the var
+void mode_set(uint8_t mode) {
+
+    mode_prev = mode_current;
+    mode_current = mode;
+
+    mode_set_indicator(mode);
 }
 
-void mode_decrement(void) {
-    if(current_mode == 0)
-        current_mode = mode_count;
 
-    mode_set(current_mode - 1);
+
+void mode_increment_indicator() {
+    mode_set_indicator(increment_wrap(mode_current, mode_count));
 }
+
+void mode_decrement_indicator() {
+    mode_set_indicator(decrement_wrap(mode_current, mode_count));
+}
+
+void mode_increment() {
+    mode_set(increment_wrap(mode_current, mode_count));
+}
+
+void mode_decrement() {
+    mode_set(decrement_wrap(mode_current, mode_count));
+}
+
 
 //edit operations ==================================================================================================================
 
@@ -101,22 +93,22 @@ void edit_hsv_update(uint16_t keycode) {
 
     switch (keycode) {
         case KEY_EDIT_HSV_SAD:
-            rgblight_decrease_sat_noeeprom();
+            hsv_decrease_sat();
             break;
         case KEY_EDIT_HSV_SAI:
-            rgblight_increase_sat_noeeprom();
+            hsv_increase_sat();
             break;
         case KEY_EDIT_HSV_VAD:
-            rgblight_decrease_val_noeeprom();
+            hsv_decrease_val();
             break;
         case KEY_EDIT_HSV_VAI:
-            rgblight_increase_val_noeeprom();
+            hsv_increase_val();
             break;
         case KEY_EDIT_HSV_HUD:
-            rgblight_decrease_hue_noeeprom();
+            hsv_decrease_hue();
             break;
         case KEY_EDIT_HSV_HUI:
-            rgblight_decrease_hue_noeeprom();
+            hsv_increase_hue();
             break;
         default:
             break;
@@ -124,49 +116,49 @@ void edit_hsv_update(uint16_t keycode) {
 }
 
 void edit_hsv_exit(void) {
-    eeprom_update_hsv(current_mode, rgblight_get_hue(), rgblight_get_sat(), rgblight_get_val());
+    HSV hsv = hsv_get_current();
+    eeprom_update_hsv(mode_current, hsv.h, hsv.s, hsv.v);
 }
 
 void edit_mode_indication_update(uint16_t keycode) {
 
-        switch (keycode) {
+    switch (keycode) {
         case KEY_EDIT_MODE_INDICATION_UP:
-            if(mode_indication < MI_BINARY_COLOR)
-                mode_indication++;
+            mode_indication = increment(mode_indication, MI_LAST);
             break;
         case KEY_EDIT_MODE_INDICATION_DOWN:
-            if(mode_indication > MI_NONE)
-                mode_indication--;
+            mode_indication = decrement(mode_indication);
             break;
         default:
             break;
     }
+
+    mode_set(mode_current);
 }
 
 void edit_mode_indication_exit(void) {
     eeprom_update_mode_indication(mode_indication);
-    mode_set(current_mode);
 }
 
 void edit_mode_count_update(uint16_t keycode) {
-
-        switch (keycode) {
+    uprintf("mode_update pre %u, %u\n", mode_count < MAX_MODES);
+    switch (keycode) {
         case KEY_EDIT_MODE_COUNT_UP:
-            if(current_mode < mode_count)
-                current_mode++;
+            mode_count = increment(mode_count, MAX_MODES);
             break;
         case KEY_EDIT_MODE_COUNT_DOWN:
-            if(current_mode > 0)
-                current_mode--;
+            mode_count = decrement(mode_count);
             break;
         default:
             break;
     }
-
+    uprintf("mode_update post %u, %u\n", mode_count < MAX_MODES);
+    hsv_enable_binary(mode_count);
+    hsv_set(0,0,hsv_get_current().v);
 }
 
 void edit_mode_count_exit(void) {
-    eeprom_update_mode_count(current_mode);
+    eeprom_update_mode_count(mode_count);
     mode_set(0);
 }
 
@@ -184,8 +176,14 @@ void keyboard_post_init_kb(void) {
         beadpad_eeprom_init(false);
     }
 
+    hsv_init();
+
+   // rgblight_enable_noeeprom();
+
     mode_count = eeprom_read_mode_count();
     mode_indication = eeprom_read_mode_indication();
+
+    wait_ms(100);
     mode_set(0);
 }
 
@@ -195,9 +193,16 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 }
 
 void encoder_update_kb(uint8_t index, bool clockwise) {
-    handle_key(clockwise ? ROT_CW : ROT_CCW, false);
+   handle_key(clockwise ? ROT_CW : ROT_CCW, false);
 }
 
+void suspend_power_down_kb(void) {
+    hsv_enable(false);
+}
+
+void suspend_wakeup_init_kb(void) {
+    mode_set(mode_current);
+}
 
 
 // layout isn't intended to be changed, behaviour is controlled by a listener script on the host
