@@ -1,11 +1,27 @@
+/* Copyright 2020 Chris Beedie
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eeprom.h"
 #include "color.h"
 
 #define SIZE_OF_BYTE 8
 
-#define HUE_PACK_BITS 7
+#define HUE_PACK_BITS 6
 #define SAT_PACK_BITS 6
-#define VAL_PACK_BITS 3
+#define VAL_PACK_BITS 4
 
 #define HUE_PACK_OFFSET (2*SIZE_OF_BYTE - HUE_PACK_BITS)
 #define SAT_PACK_OFFSET (2*SIZE_OF_BYTE - HUE_PACK_BITS - SAT_PACK_BITS)
@@ -32,11 +48,4 @@ void eeprom_update_mode_indication(uint8_t mode_indication);
 
 uint8_t eeprom_read_mode_count(void);
 void eeprom_update_mode_count(uint8_t mode_count);
-
-
-uint8_t eeprom_read_debug(void);
-
-void eeprom_update_debug(uint8_t val);
-
-
 

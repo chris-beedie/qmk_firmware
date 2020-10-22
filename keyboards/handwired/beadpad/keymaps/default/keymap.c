@@ -20,55 +20,58 @@
 //##########################################################################################################################
 //things you will want to change
 
+//indicator colour for each mode
+#define HSV_MODE_0 0,   255, 50
+#define HSV_MODE_1 30,  255, 50
+#define HSV_MODE_2 60,  255, 50
+#define HSV_MODE_3 90,  255, 50
+#define HSV_MODE_4 120, 255, 50
+#define HSV_MODE_5 150, 255, 50
+#define HSV_MODE_6 180, 255, 50
+#define HSV_MODE_7 210, 255, 50
 
-
-
-//on flash the number of modes and mode indicator colours will be set to what is defined below, to keep what is stored in the eeprom define PRESERVE_CUSTOMISATION
-//#define PRESERVE_CUSTOMISATION
+//how should the current mode be displayed (MI_NONE, MI_MODE_UP, MI_MODE_DOWN, MI_MODE_UP_DOWN, MI_ALL, MI_BINARY)
+#define MODE_INDICATION MI_MODE_UP
 
 //How many modes? (Max=8)
 #define MODE_COUNT 8 // number of modes to switch through
 
-//indicator colour for each mode, all 8 need to be defined even if not in use
-#define HSV_MODE_0 0,   255, 100
-#define HSV_MODE_1 30,  255, 100
-#define HSV_MODE_2 60,  255, 100
-#define HSV_MODE_3 90,  255, 100
-#define HSV_MODE_4 120, 255, 100
-#define HSV_MODE_5 150, 255, 100
-#define HSV_MODE_6 180, 255, 100
-#define HSV_MODE_7 210, 255, 100
+//==============================================================================================
+//enable settinguration settings during operation to permit changing the settings above after flashing
 
+//  - hold the setting key (indicated below) and press other keys to adjust settings,
+//  - releasing setting key saves to eeprom
+//  - these will be reset during flash unless PRESERVE_SETTINGS is defined
+#define SETTING_HSV_ENABLE //HOLD KEY1 (SETTING_HSV_KEY) - KEY2/KEY3 = Sat, KEY4/KEY5 = Val, ROT_CW/ROT_CCW = Hue
+#define SETTING_MODE_INDICATION_ENABLE //HOLD KEY2 (SETTING_MODE_INDICATION_KEY) - ROT_CW/ROT_CCW change mode indication setting
+#define SETTING_MODE_COUNT_ENABLE //HOLD KEY3 (SETTING_MODE_COUNT_KEY) - ROT_CW/ROT_CCW change number of modes (count indicated in binary)
 
-#define EDIT_HSV_ENABLE
-#define EDIT_MODE_INDICATION_ENABLE
-#define EDIT_MODE_COUNT_ENABLE
+//#define PRESERVE_SETTINGS
 
+//==============================================================================================
+//define how modes are switched between
 
+//dedicated buttons (optional) - these button presses will not be relayed to the computer
 #define KEY_MODE_UP KEY1
 #define KEY_MODE_DOWN KEY2
 
-
-//not possible if using ROT_CW or ROT_CCW for MODE_UP
-//can still be used even with dedicated down button
-//#define MODE_HOLD_TERM 500
-
+//hold button (optional) - can be layer on top of dedicated mode keys above
+//ROT_CW or ROT_CCW can't be held, so are not valid for mode hold change keys
 #define KEY_MODE_UP_HOLD KEY3
 #define KEY_MODE_DOWN_HOLD KEY4
 
-//#define MODE_ROT_ADJUST_ENABLED
+//define how long (ms) the button must be held before changing mode (500ms default)
+//#define MODE_HOLD_TERM 300
 
-
-#define MODE_INDICATION MI_MODE_UP
+//use the rotarty encoder to change by pressing and twisting
+//not available if using ROT_CW or ROT_CCW as dedicated mode change options above
+#define MODE_ROT_ADJUST_ENABLED
 
 
 //##########################################################################################################################
 //things you might want to change
 
-//keys used to represent the control and status bits (should be keys that don't otherwise do anything)
-#define TERMINATOR KC_F24
-#define MODE_BITS { KC_F23, KC_F22, KC_F21 }
-#define KEY_BITS  { KC_F20, KC_F19, KC_F18 }
+
 
 
 //##########################################################################################################################

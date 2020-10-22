@@ -1,5 +1,20 @@
-#include "beadpad_led.h"
+/* Copyright 2020 Chris Beedie
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
+#include "beadpad_led.h"
 
 static bool enabled[RGBLED_NUM];
 static LED_TYPE led[RGBLED_NUM];
@@ -51,10 +66,6 @@ void hsv_refresh(void) {
             led[i].w = 0;
             #endif
         }
-     }
-
-    for (uint8_t i = 0; i < RGBLED_NUM; i++) {
-        uprintf("led %u is %u: %u, %u, %u\n",i, enabled[i], led[i].r, led[i].g, led[i].b);
     }
 
     hsv_call_driver(led, RGBLED_NUM);
@@ -81,12 +92,12 @@ void hsv_set(uint8_t hue, uint8_t sat, uint8_t val) {
     hsv_refresh();
 }
 
-
-void hsv_increase_hue(void) { hsv_set(increment_step(hsv.h, RGBLIGHT_HUE_STEP, UINT8_MAX), hsv.s, hsv.v); }
-void hsv_decrease_hue(void) { hsv_set(decrement_step(hsv.h, RGBLIGHT_HUE_STEP), hsv.s, hsv.v); }
+//change the hsv values by the step amount, allow hue to wrap
+void hsv_increase_hue(void) { hsv_set(increment_step_wrap(hsv.h, RGBLIGHT_HUE_STEP, UINT8_MAX), hsv.s, hsv.v); }
+void hsv_decrease_hue(void) { hsv_set(decrement_step_wrap(hsv.h, RGBLIGHT_HUE_STEP, UINT8_MAX), hsv.s, hsv.v); }
 void hsv_increase_sat(void) { hsv_set(hsv.h, increment_step(hsv.s, RGBLIGHT_SAT_STEP, UINT8_MAX), hsv.v); }
-void hsv_decrease_sat(void) { hsv_set(hsv.h, decrement_step(hsv.s, RGBLIGHT_SAT_STEP), hsv.v); }
+void hsv_decrease_sat(void) { hsv_set(hsv.h, decrement_step(hsv.s, RGBLIGHT_SAT_STEP, 0), hsv.v); }
 void hsv_increase_val(void) { hsv_set(hsv.h, hsv.s, increment_step(hsv.v, RGBLIGHT_VAL_STEP, UINT8_MAX)); }
-void hsv_decrease_val(void) { hsv_set(hsv.h, hsv.s, decrement_step(hsv.v, RGBLIGHT_VAL_STEP)); }
+void hsv_decrease_val(void) { hsv_set(hsv.h, hsv.s, decrement_step(hsv.v, RGBLIGHT_VAL_STEP, 0)); }
 
 

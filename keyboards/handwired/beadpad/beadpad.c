@@ -13,6 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "beadpad.h"
 #include "beadpad_util.c"
 #include "beadpad_eeprom.c"
@@ -20,8 +21,12 @@
 
 uint8_t mode_count = MAX_MODES;
 uint8_t mode_current = 0; //keep track of current mode
-uint8_t mode_prev = 0;
 
+uint16_t key_mode_up;
+uint16_t key_mode_down;
+
+__attribute__((weak)) void beadpad_init(void) {  }
+__attribute__((weak)) void check_mode_hold(void) {  }
 __attribute__((weak)) void handle_key(uint16_t keycode, bool pressed) {  }
 
 //mode operations ==================================================================================================================
@@ -61,14 +66,9 @@ void mode_set_indicator(uint8_t mode) {
 
 // sets the mode - just a case of changin colour and setting the var
 void mode_set(uint8_t mode) {
-
-    mode_prev = mode_current;
     mode_current = mode;
-
     mode_set_indicator(mode);
 }
-
-
 
 void mode_increment_indicator() {
     mode_set_indicator(increment_wrap(mode_current, mode_count));
@@ -87,27 +87,57 @@ void mode_decrement() {
 }
 
 
-//edit operations ==================================================================================================================
+//setting operations ==================================================================================================================
 
-void edit_hsv_update(uint16_t keycode) {
+bool check_setting_update(uint16_t keycode) {
+    //loop though each setting, if enabled and the key is down, action the new key
+
+    for (uint8_t i = 0; i < SETTING_COUNT; i++) {
+        struct setting setting = settings[i];
+
+        if (setting.enabled && keycode != setting.keycode && keystate[setting.keycode] != NONE) {
+            setting.update(keycode);
+            keystate[setting.keycode] = CONFIG;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool check_setting_complete(uint16_t keycode) {
+
+    //loop though each setting, if enabled and the key was active, complete the setting
+    for (uint8_t i = 0; i < SETTING_COUNT; i++) {
+        struct setting setting = settings[i];
+
+        if (setting.enabled && keycode == setting.keycode && keystate[setting.keycode] == CONFIG) {
+            setting.complete();
+            keystate[setting.keycode] = NONE;
+            return true;
+        }
+    }
+    return false;
+}
+
+void setting_update_hsv(uint16_t keycode) {
 
     switch (keycode) {
-        case KEY_EDIT_HSV_SAD:
+        case SETTING_HSV_KEY_SAD:
             hsv_decrease_sat();
             break;
-        case KEY_EDIT_HSV_SAI:
+        case SETTING_HSV_KEY_SAI:
             hsv_increase_sat();
             break;
-        case KEY_EDIT_HSV_VAD:
+        case SETTING_HSV_KEY_VAD:
             hsv_decrease_val();
             break;
-        case KEY_EDIT_HSV_VAI:
+        case SETTING_HSV_KEY_VAI:
             hsv_increase_val();
             break;
-        case KEY_EDIT_HSV_HUD:
+        case SETTING_HSV_KEY_HUD:
             hsv_decrease_hue();
             break;
-        case KEY_EDIT_HSV_HUI:
+        case SETTING_HSV_KEY_HUI:
             hsv_increase_hue();
             break;
         default:
@@ -115,19 +145,19 @@ void edit_hsv_update(uint16_t keycode) {
     }
 }
 
-void edit_hsv_exit(void) {
+void setting_complete_hsv(void) {
     HSV hsv = hsv_get_current();
     eeprom_update_hsv(mode_current, hsv.h, hsv.s, hsv.v);
 }
 
-void edit_mode_indication_update(uint16_t keycode) {
+void setting_update_mode_indication(uint16_t keycode) {
 
     switch (keycode) {
-        case KEY_EDIT_MODE_INDICATION_UP:
+        case SETTING_MODE_INDICATION_KEY_UP:
             mode_indication = increment(mode_indication, MI_LAST);
             break;
-        case KEY_EDIT_MODE_INDICATION_DOWN:
-            mode_indication = decrement(mode_indication);
+        case SETTING_MODE_INDICATION_KEY_DOWN:
+            mode_indication = decrement(mode_indication, 0);
             break;
         default:
             break;
@@ -136,28 +166,28 @@ void edit_mode_indication_update(uint16_t keycode) {
     mode_set(mode_current);
 }
 
-void edit_mode_indication_exit(void) {
+void setting_complete_mode_indication(void) {
     eeprom_update_mode_indication(mode_indication);
 }
 
-void edit_mode_count_update(uint16_t keycode) {
-    uprintf("mode_update pre %u, %u\n", mode_count < MAX_MODES);
+void setting_update_mode_count(uint16_t keycode) {
+
     switch (keycode) {
-        case KEY_EDIT_MODE_COUNT_UP:
+        case SETTING_MODE_COUNT_KEY_UP:
             mode_count = increment(mode_count, MAX_MODES);
             break;
-        case KEY_EDIT_MODE_COUNT_DOWN:
-            mode_count = decrement(mode_count);
+        case SETTING_MODE_COUNT_KEY_DOWN:
+            mode_count = decrement(mode_count, 1);
             break;
         default:
             break;
     }
-    uprintf("mode_update post %u, %u\n", mode_count < MAX_MODES);
+
     hsv_enable_binary(mode_count);
     hsv_set(0,0,hsv_get_current().v);
 }
 
-void edit_mode_count_exit(void) {
+void setting_complete_mode_count(void) {
     eeprom_update_mode_count(mode_count);
     mode_set(0);
 }
@@ -176,15 +206,24 @@ void keyboard_post_init_kb(void) {
         beadpad_eeprom_init(false);
     }
 
-    hsv_init();
-
-   // rgblight_enable_noeeprom();
-
     mode_count = eeprom_read_mode_count();
     mode_indication = eeprom_read_mode_indication();
 
-    wait_ms(100);
-    mode_set(0);
+    settings[SETTING_HSV_IDX].keycode = SETTING_HSV_KEY;
+    settings[SETTING_HSV_IDX].update = setting_update_hsv;
+    settings[SETTING_HSV_IDX].complete = setting_complete_hsv;
+
+    settings[SETTING_MODE_INDICATION_IDX].keycode = SETTING_MODE_INDICATION_KEY;
+    settings[SETTING_MODE_INDICATION_IDX].update = setting_update_mode_indication;
+    settings[SETTING_MODE_INDICATION_IDX].complete = setting_complete_mode_indication;
+
+    settings[SETTING_MODE_COUNT_IDX].keycode = SETTING_MODE_COUNT_KEY;
+    settings[SETTING_MODE_COUNT_IDX].update = setting_update_mode_count;
+    settings[SETTING_MODE_COUNT_IDX].complete = setting_complete_mode_count;
+
+    hsv_init();
+    beadpad_init();
+
 }
 
 bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
@@ -204,8 +243,7 @@ void suspend_wakeup_init_kb(void) {
     mode_set(mode_current);
 }
 
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {{{ KEYS, ROT_BUT }}};
 
-// layout isn't intended to be changed, behaviour is controlled by a listener script on the host
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [0] = LAYOUT( KEY1, KEY2, KEY3, KEY4, KEY5, ROT_BUT)
-};
+
+

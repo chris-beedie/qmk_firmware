@@ -1,20 +1,29 @@
+/* Copyright 2020 Chris Beedie
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 //TODO - update readme
 //TODO - update info.json
 //TODO - add ifndefs for all users vars
-//TODO - long press should give feedback when the timer is hit rather than when released
 //TODO - comment
+//TODO check invalid define options here
+//TODO - change rot button to dedicated pin to clean up keymap
+//TODO sleep not working
 
-
-//BUG
-// mode down not working
-//mode hold goes active, which means it triggers the edit end function
-
-
-//do we need to update lighting as the user changes edit setting?
-//is there a way to indicate mode hold has kicked in without getting in the way?
-
-
+//TODO - refactor to allow number of keys to be changed, define these in setting.h?
+//would need to do checks like making sure the KEY_BITS array and count all make sense
 
 
 #include "beadpad_eeprom.h"
@@ -43,12 +52,30 @@ const int KEY_BITS_ARR[] = KEY_BITS ;
 
 uint16_t mode_hold_timer;
 
-uint16_t key_mode_up = KEY_MODE_UP;
-uint16_t key_mode_down = KEY_MODE_DOWN;
+void beadpad_init(void) {
 
+    key_mode_up = KEY_MODE_UP;
+    key_mode_down = KEY_MODE_DOWN;
+
+    #ifdef SETTING_HSV_ENABLE
+    settings[SETTING_HSV_IDX].enabled = true;
+    #endif
+
+    #ifdef SETTING_MODE_INDICATION_ENABLE
+    settings[SETTING_MODE_INDICATION_IDX].enabled = true;
+    #endif
+
+    #ifdef SETTING_MODE_COUNT_ENABLE
+    settings[SETTING_MODE_COUNT_IDX].enabled = true;
+    #endif
+
+    mode_set(3);
+}
+
+//store the user defined settings in eeprom
 void beadpad_eeprom_init(bool force) {
 
-    #ifdef PRESERVE_CUSTOMISATION
+    #ifdef PRESERVE_SETTINGS
     if (!force)
         return;
     #endif
@@ -71,6 +98,7 @@ void beadpad_eeprom_init(bool force) {
     }
 }
 
+//convert and send our mode/key in encoded message
 void send_keypress(uint16_t keycode) {
    //uprintf("keycode: %u\n", keycode);
 
@@ -93,156 +121,65 @@ void send_keypress(uint16_t keycode) {
     //uprintf("mode: %u\n", mode_current);
 }
 
-
-bool mode_change_held(uint16_t keycode) {
-    return keystate[keycode] == PRESSED && timer_elapsed(mode_hold_timer) > MODE_HOLD_TERM;
+//helper to check if mode hold timer has expired
+bool mode_change_held(void) {
+    return timer_elapsed(mode_hold_timer) > MODE_HOLD_TERM;
 }
 
-void matrix_scan_user(void) {
 
-    #ifdef KEY_MODE_UP_HOLD
-    if (mode_change_held(KEY_MODE_UP_HOLD)) {
-        keystate[KEY_MODE_UP_HOLD] = ACTIVE;
-        mode_increment_indicator();
-    }
-    #endif
-
-    #ifdef KEY_MODE_DOWN_HOLD
-    if (mode_change_held(KEY_MODE_DOWN_HOLD)) {
-        keystate[KEY_MODE_DOWN_HOLD] = ACTIVE;
-        mode_decrement_indicator();
-    }
-    #endif
-}
-
-//hod to know if this has happened? store a bool? do the same check?
-//if we store a bool, when do we reset?
-
-
+//main method for porcessing what action to take given the state of the keys
 void handle_key(uint16_t keycode, bool pressed) {
 
-
-
-
-    //if a key is active and it changes, then handle and return, this is used for editing eeprom
-
-    // uprintf("keycode: %u, pressed:%u, mode: %u, mode_in: %u\n", keycode,pressed,mode_current, mode_indication);
-
-    // for(uint8_t k=0;k<8;k++) {
-    // uprintf("keycode: %u, state: %u\n", k,  keystate[k]);
-    // }
-
-    //to do mode hold chnage on ready:
-        //matrix scan kb would need to be running if the value is true, then set the colour (could yuo set mode? - would have to)
-        //but if an edit kicks in...
-        //clear trigger - to cancel matrix scan check
-        //needs to go back to real mode,
-        //alternnatively, could blink light.
-
-    //the same key could be an edit, and we've just set it to active... that's ok
-    //how do we roll back layer if we enter an edit mode?
-
-
-
-
-    if(keystate[keycode] == ACTIVE) {
-        keystate[keycode] = NONE;
-
-        #ifdef EDIT_HSV_ENABLE
-        if (keycode == KEY_EDIT_HSV) {
-            edit_hsv_exit();
-            uprintf("a\n");
-        }
-        #endif
-
-        #ifdef EDIT_MODE_INDICATION_ENABLE
-        if (keycode == KEY_EDIT_MODE_INDICATION) {
-            edit_mode_indication_exit();
-            uprintf("b\n");
-        }
-        #endif
-
-        #ifdef EDIT_MODE_COUNT_ENABLE
-        if (keycode == KEY_EDIT_MODE_COUNT) {
-            edit_mode_count_exit();
-            uprintf("c\n");
-        }
-        #endif
-
+    //check and processs any finishing setting and exit further key handling
+    if(check_setting_complete(keycode)) {
         return;
-    } else {
-        keystate[keycode] = pressed ? PRESSED : NONE;
-        uprintf("d\n");
     }
 
-    //only special cases occur on the press
+     //only special cases occur on the press
     if(pressed) {
+        keystate[keycode] = PRESSED;
 
-        //special case - mode hold
+        //special case - mode hold, start timers
         #ifdef KEY_MODE_UP_HOLD
         if (keycode == KEY_MODE_UP_HOLD) {
             mode_hold_timer = timer_read();
-            uprintf("e\n");
         }
         #endif
         #ifdef KEY_MODE_DOWN_HOLD
         if (keycode == KEY_MODE_DOWN_HOLD) {
             mode_hold_timer = timer_read();
-            uprintf("f\n");
         }
         #endif
+
 
     } else {
+        keystate[keycode] = NONE;
 
-        //special case - editing on the fly
-        #ifdef EDIT_HSV_ENABLE
-        if (keycode != KEY_EDIT_HSV && keystate[KEY_EDIT_HSV] != NONE) {
-            edit_hsv_update(keycode);
-            keystate[KEY_EDIT_HSV] = ACTIVE;
-            uprintf("g\n");
+        //special case - setting editing, check to see if a setting change is active, and handle it if so
+        if(check_setting_update(keycode)) {
             return;
         }
-        #endif
-
-        #ifdef EDIT_MODE_INDICATION_ENABLE
-        if (keycode != KEY_EDIT_MODE_INDICATION && keystate[KEY_EDIT_MODE_INDICATION] != NONE) {
-            edit_mode_indication_update(keycode);
-            keystate[KEY_EDIT_MODE_INDICATION] = ACTIVE;
-            uprintf("h\n");
-            return;
-        }
-        #endif
-
-        #ifdef EDIT_MODE_COUNT_ENABLE
-        if (keycode != KEY_EDIT_MODE_COUNT && keystate[KEY_EDIT_MODE_COUNT] != NONE) {
-            edit_mode_count_update(keycode);
-            keystate[KEY_EDIT_MODE_COUNT] = ACTIVE;
-            uprintf("i\n");
-            return;
-        }
-        #endif
 
         //special case - mode hold
         #ifdef KEY_MODE_UP_HOLD
-        if (mode_change_held(KEY_MODE_UP_HOLD)) {
+        if (keycode == KEY_MODE_UP_HOLD  && mode_change_held()) {
             keycode = KEY_MODE_UP;
-            uprintf("j\n");
         }
         #endif
         #ifdef KEY_MODE_DOWN_HOLD
-        if (mode_change_held(KEY_MODE_DOWN_HOLD)) {
+        if (keycode == KEY_MODE_DOWN_HOLD && mode_change_held()) {
             keycode = KEY_MODE_DOWN;
-            uprintf("k\n");
         }
         #endif
 
         //special case - rot mode change (press and turn)
         #ifdef MODE_ROT_ADJUST_ENABLED
         if (keystate[ROT_BUT] != NONE) {
-            if(keycode == ROT_CW)
-                keycode = KEY_MODE_UP;
-            else if(keycode == ROT_CCW)
-                keycode = KEY_MODE_DOWN;
+            keycode = keycode == ROT_CW ? KEY_MODE_UP : KEY_MODE_DOWN;
+            // if(keycode == ROT_CW)
+            //     keycode = KEY_MODE_UP;
+            // else if(keycode == ROT_CCW)
+            //     keycode = KEY_MODE_DOWN;
         }
         #endif
         uprintf("l\n");
@@ -250,17 +187,33 @@ void handle_key(uint16_t keycode, bool pressed) {
         switch (keycode) {
             case KEY_MODE_UP:
                 mode_increment();
-                uprintf("m\n");
                 break;
             case KEY_MODE_DOWN:
                 mode_decrement();
-                uprintf("n\n");
                 break;
             default:
                // send_keypress(keycode);
-               uprintf("o\n");
                 break;
         }
     }
 }
 
+void matrix_scan_user(void) {
+
+    //update indicator on mode hold so user knows they have held it long enough
+    //mode change is committed by keyhandler in case an edit mode interupts
+
+    #ifdef KEY_MODE_UP_HOLD
+    if (keystate[KEY_MODE_UP_HOLD] == PRESSED && mode_change_held()) {
+        keystate[KEY_MODE_UP_HOLD] = HELD;
+        mode_increment_indicator();
+    }
+    #endif
+
+    #ifdef KEY_MODE_DOWN_HOLD
+    if (keystate[KEY_MODE_DOWN_HOLD] == PRESSED && mode_change_held()) {
+        keystate[KEY_MODE_DOWN_HOLD] = HELD;
+        mode_decrement_indicator();
+    }
+    #endif
+}

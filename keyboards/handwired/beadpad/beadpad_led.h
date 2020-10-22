@@ -1,4 +1,20 @@
 
+/* Copyright 2020 Chris Beedie
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "ws2812.h"
 #include "color.h"
 
@@ -7,7 +23,7 @@
 #endif
 
 #ifndef RGBLIGHT_HUE_STEP
-#define RGBLIGHT_HUE_STEP 2
+#define RGBLIGHT_HUE_STEP 4
 #endif
 
 #ifndef RGBLIGHT_SAT_STEP
@@ -15,12 +31,12 @@
 #endif
 
 #ifndef RGBLIGHT_VAL_STEP
-#define RGBLIGHT_VAL_STEP 32
+#define RGBLIGHT_VAL_STEP 16
 #endif
 
 HSV hsv_get_current(void);
 
-__attribute__((weak)) void hsv_call_driver(LED_TYPE *start_led, uint8_t num_leds);
+//__attribute__((weak)) void hsv_call_driver(LED_TYPE *start_led, uint8_t num_leds);
 
 void hsv_enable(bool enable);
 void hsv_enable_at(uint8_t index, bool enable);
