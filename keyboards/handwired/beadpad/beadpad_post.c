@@ -22,9 +22,28 @@
 //TODO - change rot button to dedicated pin to clean up keymap
 //TODO sleep not working
 
+
+//REFACTORRRRRR
+/*
+    move pack bits to config? make surte they add to 16
+    hsv step values based on pack bits
+
+
+
+    //files for:
+        settings
+        mode
+
+
+
+
+
+*/
+
+
 //TODO - refactor to allow number of keys to be changed, define these in setting.h?
 //would need to do checks like making sure the KEY_BITS array and count all make sense
-
+//can hsv increments be tied to number of bits?
 
 #include "beadpad_eeprom.h"
 #include "beadpad_led.h"
