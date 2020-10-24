@@ -15,6 +15,7 @@
  */
 
 #include "beadpad_led.h"
+#include "beadpad_util.c"
 
 static bool enabled[RGBLED_NUM];
 static LED_TYPE led[RGBLED_NUM];
@@ -43,14 +44,14 @@ void hsv_enable_binary(uint16_t bin_val) {
 
 }
 
-void hsv_init(void) {
+// void hsv_init(void) {
 
-    if (!eeconfig_is_enabled()) {
-        eeconfig_init();
-    }
+//     if (!eeconfig_is_enabled()) {
+//         eeconfig_init();
+//     }
 
-    hsv_enable(true);
-}
+//     hsv_enable(true);
+// }
 
 
 __attribute__((weak)) void hsv_call_driver(LED_TYPE *start_led, uint8_t num_leds) { ws2812_setleds(start_led, num_leds); }

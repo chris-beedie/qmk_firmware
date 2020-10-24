@@ -46,7 +46,11 @@
 //can hsv increments be tied to number of bits?
 
 #include "beadpad_eeprom.h"
-#include "beadpad_led.h"
+
+#include "beadpad_mode.c"
+#include "beadpad_settings.c"
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {{{ KEYS, ROT_BUT }}};
 
 //mode count check
 #if MODE_COUNT > MAX_MODES
@@ -69,26 +73,21 @@ const int KEY_BITS_ARR[] = KEY_BITS ;
 #define KEY_MODE_DOWN 0xF1
 #endif
 
+enum keystate_t {
+    NONE,
+    PRESSED,
+    SETTING,
+    HELD
+} keystate[TOTAL_KEY_COUNT];
+
 uint16_t mode_hold_timer;
 
 void beadpad_init(void) {
 
-    key_mode_up = KEY_MODE_UP;
-    key_mode_down = KEY_MODE_DOWN;
+    //hsv_init();
+    mode_init();
+    settings_init();
 
-    #ifdef SETTING_HSV_ENABLE
-    settings[SETTING_HSV_IDX].enabled = true;
-    #endif
-
-    #ifdef SETTING_MODE_INDICATION_ENABLE
-    settings[SETTING_MODE_INDICATION_IDX].enabled = true;
-    #endif
-
-    #ifdef SETTING_MODE_COUNT_ENABLE
-    settings[SETTING_MODE_COUNT_IDX].enabled = true;
-    #endif
-
-    mode_set(3);
 }
 
 //store the user defined settings in eeprom
@@ -150,7 +149,7 @@ bool mode_change_held(void) {
 void handle_key(uint16_t keycode, bool pressed) {
 
     //check and processs any finishing setting and exit further key handling
-    if(check_setting_complete(keycode)) {
+    if(settings_try_complete(keycode)) {
         return;
     }
 
@@ -175,7 +174,7 @@ void handle_key(uint16_t keycode, bool pressed) {
         keystate[keycode] = NONE;
 
         //special case - setting editing, check to see if a setting change is active, and handle it if so
-        if(check_setting_update(keycode)) {
+        if(settings_try_update(keycode)) {
             return;
         }
 

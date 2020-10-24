@@ -78,5 +78,5 @@
 //things you shouldn't need to change
 
 //include the library code that handles processing of these values.
-#include "beadpad_post.c"
+#include "beadpad_core.c"
 
