@@ -1,7 +1,7 @@
 
-#include "beadpad_mode.h"
+//#include "beadpad_mode.h"
 //#include "beadpad_eeprom.h"
-#include "beadpad_led.h"
+//#include "beadpad_led.h"
 
 static uint8_t mode_count = MAX_MODES;
 static uint8_t mode_current = 0;
@@ -14,10 +14,13 @@ enum mode_indication_t {
     MI_MODE_UP_DOWN,
     MI_ALL,
     MI_BINARY,
-
 } mode_indication;
 
 #define MI_LAST MI_BINARY
+
+uint8_t mode_get_current(void) {
+    return mode_current;
+}
 
 // eeprom read/write  =========================================================================================================
 
@@ -43,7 +46,8 @@ void mode_set_indicator(uint8_t mode) {
 
     HSV mode_hsv = mode_hsv_read_for(mode);
 
-    uprintf("h: %u,s: %u, v: %u\n", mode_hsv.h, mode_hsv.s, mode_hsv.v);
+
+    //uprintf("h: %u,s: %u, v: %u\n", mode_hsv.h, mode_hsv.s, mode_hsv.v);
 
     hsv_enable(false);
 
@@ -75,11 +79,11 @@ void mode_refresh_indicator(void) {
     mode_set_indicator(mode_current);
 }
 
-void mode_increment_indicator() {
+void mode_increment_indicator(void) {
     mode_set_indicator(increment_wrap(mode_current, mode_count));
 }
 
-void mode_decrement_indicator() {
+void mode_decrement_indicator(void) {
     mode_set_indicator(decrement_wrap(mode_current, mode_count));
 }
 
@@ -94,11 +98,11 @@ void mode_refresh(void) {
     mode_set(mode_current);
 }
 
-void mode_increment() {
+void mode_increment(void) {
     mode_set(increment_wrap(mode_current, mode_count));
 }
 
-void mode_decrement() {
+void mode_decrement(void) {
     mode_set(decrement_wrap(mode_current, mode_count));
 }
 
@@ -129,6 +133,68 @@ void mode_count_display(void) {
     hsv_set(0,0,hsv_get_current().v);
 }
 
+//helper to check if mode hold timer has expired
+bool mode_change_held(void) {
+    return timer_elapsed(mode_hold_timer) > MODE_HOLD_TERM;
+}
+
+void mode_hold_try_start(uint16_t keycode) {
+
+    #ifdef KEY_MODE_UP_HOLD
+    if (keycode == KEY_MODE_UP_HOLD) {
+        mode_hold_timer = timer_read();
+    }
+    #endif
+    #ifdef KEY_MODE_DOWN_HOLD
+    if (keycode == KEY_MODE_DOWN_HOLD) {
+        mode_hold_timer = timer_read();
+    }
+    #endif
+}
+
+uint16_t mode_hold_try_action(uint16_t keycode) {
+
+    #ifdef KEY_MODE_UP_HOLD
+    if (keycode == KEY_MODE_UP_HOLD  && mode_change_held()) {
+        return KEY_MODE_UP;
+    }
+    #endif
+
+    #ifdef KEY_MODE_DOWN_HOLD
+    if (keycode == KEY_MODE_DOWN_HOLD && mode_change_held()) {
+        return KEY_MODE_DOWN;
+    }
+    #endif
+
+    return keycode;
+}
+
+void mode_hold_check(void) {
+
+    #ifdef KEY_MODE_UP_HOLD
+    if (keystate[KEY_MODE_UP_HOLD] == PRESSED && mode_change_held()) {
+        keystate[KEY_MODE_UP_HOLD] = HELD;
+        mode_increment_indicator();
+    }
+    #endif
+
+    #ifdef KEY_MODE_DOWN_HOLD
+    if (keystate[KEY_MODE_DOWN_HOLD] == PRESSED && mode_change_held()) {
+        keystate[KEY_MODE_DOWN_HOLD] = HELD;
+        mode_decrement_indicator();
+    }
+    #endif
+}
+
+uint16_t mode_rot_adjust_try_action(uint16_t keycode) {
+    #ifdef MODE_ROT_ADJUST_ENABLED
+    if (keystate[ROT_BUT] != NONE) {
+        return keycode == ROT_CW ? KEY_MODE_UP : KEY_MODE_DOWN;
+    }
+    #endif
+
+    return keycode;
+}
 
 void mode_init(void) {
 

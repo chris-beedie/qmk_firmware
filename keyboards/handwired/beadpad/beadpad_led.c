@@ -14,9 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "beadpad_led.h"
-#include "beadpad_util.h"
-#include "beadpad_eeprom.h"
+#include "ws2812.h"
+#include "color.h"
 
 #define SIZE_OF_BYTE 8
 

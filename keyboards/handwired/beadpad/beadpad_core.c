@@ -23,28 +23,10 @@
 //TODO sleep not working
 
 
-//REFACTORRRRRR
-/*
-    move pack bits to config? make surte they add to 16
-    hsv step values based on pack bits
 
 
 
-*/
 
-
-//TODO - refactor to allow number of keys to be changed, define these in setting.h?
-//would need to do checks like making sure the KEY_BITS array and count all make sense
-//can hsv increments be tied to number of bits?
-
-//#include "beadpad_eeprom.h"
-
-
-#include "beadpad_mode.h"
-#include "beadpad_led.h"
-#include "beadpad_settings.h"
-
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {{{ KEYS, ROT_BUT }}};
 
 //mode count check
 #if MODE_COUNT > MAX_MODES
@@ -67,10 +49,81 @@ const int KEY_BITS_ARR[] = KEY_BITS ;
 #define KEY_MODE_DOWN 0xF1
 #endif
 
+#include "beadpad_util.c"
+#include "beadpad_led.c"
+#include "beadpad_eeprom.c"
+#include "beadpad_mode.c"
+#include "beadpad_settings.c"
+
+//convert and send our mode/key in encoded message
+void send_keypress(uint8_t mode, uint16_t keycode) {
+   //uprintf("keycode: %u\n", keycode);
+
+    uint8_t input, bit;
+
+    input = mode;
+    for(bit = 0; bit < MODE_BITS_SIZE; ++bit, input >>= 1) {
+       //uprintf("mode, bit %u:\t%u\t%u\n", bit, input & 1, MODE_BITS_ARR[bit]);
+        if (input & 1)
+            tap_code(MODE_BITS_ARR[bit]);
+    }
+    input = keycode;
+    for(bit = 0; bit < KEY_BITS_SIZE; ++bit, input >>= 1) {
+       //uprintf("key, bit %u:\t%u\t%u\n", bit, input & 1, KEY_BITS_ARR[bit]);
+        if (input & 1)
+            tap_code(KEY_BITS_ARR[bit]);
+    }
+
+    tap_code(TERMINATOR);
+    //uprintf("mode: %u\n", mode_current);
+}
+
+
+//main method for porcessing what action to take given the state of the keys
+void handle_key(uint16_t keycode, bool pressed) {
+
+
+    uprintf("here: %u, %u, %u, %u\n", KEY2, KEY3, ROT_BUT, ROT_CCW);
+
+
+    //check and processs any finishing setting and exit further key handling
+    if(settings_try_complete(keycode)) {
+        return;
+    }
+
+     //only special cases occur on the press
+    if(pressed) {
+        keystate[keycode] = PRESSED;
+
+        mode_hold_try_start(keycode);
+    } else {
+        keystate[keycode] = NONE;
+
+        if(settings_try_update(keycode)) {
+            return;
+        }
+
+        keycode = mode_hold_try_action(keycode);
+        keycode = mode_rot_adjust_try_action(keycode);
+;
+        switch (keycode) {
+            case KEY_MODE_UP:
+                mode_increment();
+                break;
+            case KEY_MODE_DOWN:
+                mode_decrement();
+                break;
+            default:
+               // send_keypress(mode_get_current(), keycode);
+                break;
+        }
+    }
+}
+
+//initialisation =========================================================================================================
 
 void beadpad_init(void) {
 
-    //hsv_init();
     mode_init();
     settings_init();
 
@@ -102,118 +155,46 @@ void beadpad_eeprom_init(bool force) {
     }
 }
 
-//convert and send our mode/key in encoded message
-void send_keypress(uint16_t keycode) {
-   //uprintf("keycode: %u\n", keycode);
+// quantum overrides =================================================================================================
 
-    uint8_t input, bit;
-
-    input = mode_current;
-    for(bit = 0; bit < MODE_BITS_SIZE; ++bit, input >>= 1) {
-       //uprintf("mode, bit %u:\t%u\t%u\n", bit, input & 1, MODE_BITS_ARR[bit]);
-        if (input & 1)
-            tap_code(MODE_BITS_ARR[bit]);
-    }
-    input = keycode;
-    for(bit = 0; bit < KEY_BITS_SIZE; ++bit, input >>= 1) {
-       //uprintf("key, bit %u:\t%u\t%u\n", bit, input & 1, KEY_BITS_ARR[bit]);
-        if (input & 1)
-            tap_code(KEY_BITS_ARR[bit]);
-    }
-
-    tap_code(TERMINATOR);
-    //uprintf("mode: %u\n", mode_current);
+void eeconfig_init_user() {
+   beadpad_eeprom_init(true);
 }
 
-//helper to check if mode hold timer has expired
-bool mode_change_held(void) {
-    return timer_elapsed(mode_hold_timer) > MODE_HOLD_TERM;
-}
+void keyboard_post_init_user(void) {
 
-
-//main method for porcessing what action to take given the state of the keys
-void handle_key(uint16_t keycode, bool pressed) {
-
-    //check and processs any finishing setting and exit further key handling
-    if(settings_try_complete(keycode)) {
-        return;
-    }
-
-     //only special cases occur on the press
-    if(pressed) {
-        keystate[keycode] = PRESSED;
-
-        //special case - mode hold, start timers
-        #ifdef KEY_MODE_UP_HOLD
-        if (keycode == KEY_MODE_UP_HOLD) {
-            mode_hold_timer = timer_read();
-        }
-        #endif
-        #ifdef KEY_MODE_DOWN_HOLD
-        if (keycode == KEY_MODE_DOWN_HOLD) {
-            mode_hold_timer = timer_read();
-        }
-        #endif
-
-
+    if (!eeconfig_is_enabled()) {
+        eeconfig_init();
     } else {
-        keystate[keycode] = NONE;
-
-        //special case - setting editing, check to see if a setting change is active, and handle it if so
-        if(settings_try_update(keycode)) {
-            return;
-        }
-
-        //special case - mode hold
-        #ifdef KEY_MODE_UP_HOLD
-        if (keycode == KEY_MODE_UP_HOLD  && mode_change_held()) {
-            keycode = KEY_MODE_UP;
-        }
-        #endif
-        #ifdef KEY_MODE_DOWN_HOLD
-        if (keycode == KEY_MODE_DOWN_HOLD && mode_change_held()) {
-            keycode = KEY_MODE_DOWN;
-        }
-        #endif
-
-        //special case - rot mode change (press and turn)
-        #ifdef MODE_ROT_ADJUST_ENABLED
-        if (keystate[ROT_BUT] != NONE) {
-            keycode = keycode == ROT_CW ? KEY_MODE_UP : KEY_MODE_DOWN;
-        }
-        #endif
-        uprintf("l\n");
-        //normal key processing
-        switch (keycode) {
-            case KEY_MODE_UP:
-                mode_increment();
-                break;
-            case KEY_MODE_DOWN:
-                mode_decrement();
-                break;
-            default:
-               // send_keypress(keycode);
-                break;
-        }
+        beadpad_eeprom_init(false);
     }
+
+    beadpad_init();
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    handle_key(keycode, record->event.pressed);
+    return false;
+}
+
+void encoder_update_user(uint8_t index, bool clockwise) {
+   handle_key(clockwise ? ROT_CW : ROT_CCW, false);
 }
 
 void matrix_scan_user(void) {
-
-    //update indicator on mode hold so user knows they have held it long enough
-    //mode change is committed by keyhandler in case an edit mode interupts
-
-    #ifdef KEY_MODE_UP_HOLD
-    if (keystate[KEY_MODE_UP_HOLD] == PRESSED && mode_change_held()) {
-        keystate[KEY_MODE_UP_HOLD] = HELD;
-        mode_increment_indicator();
-    }
-    #endif
-
-    #ifdef KEY_MODE_DOWN_HOLD
-    if (keystate[KEY_MODE_DOWN_HOLD] == PRESSED && mode_change_held()) {
-        keystate[KEY_MODE_DOWN_HOLD] = HELD;
-        mode_decrement_indicator();
-    }
-    #endif
+    mode_hold_check();
 }
+
+
+// void suspend_power_down_kb(void) {
+//     hsv_enable(false);
+// }
+
+// void suspend_wakeup_init_kb(void) {
+//     mode_refresh();
+// }
+
+
+
+
+

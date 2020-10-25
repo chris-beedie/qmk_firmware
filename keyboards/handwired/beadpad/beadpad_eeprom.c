@@ -15,7 +15,6 @@
  */
 
 #include "eeprom.h"
-#include "beadpad_eeprom.h"
 #include "buildinfo.h"
 
 #define BUILD_ADDR              EECONFIG_SIZE
@@ -72,3 +71,5 @@ uint8_t eeprom_read_debug(void) {
 void eeprom_update_debug(uint8_t val) {
     eeprom_update_byte((uint8_t *) DEBUG_ADDR, val);
 }
+
+
