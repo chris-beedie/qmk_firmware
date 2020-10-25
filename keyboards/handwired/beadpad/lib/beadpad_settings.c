@@ -1,30 +1,9 @@
 
-// #include "beadpad_settings.h"
-// //#include "beadpad_eeprom.h"
-// #include "beadpad_mode.h"
-
-
+#define SETTING_COUNT 3
 
 #define SETTING_HSV_IDX 0
-#define SETTING_HSV_KEY KEY1
-#define SETTING_HSV_KEY_SAD KEY2
-#define SETTING_HSV_KEY_SAI KEY3
-#define SETTING_HSV_KEY_VAD KEY4
-#define SETTING_HSV_KEY_VAI KEY5
-#define SETTING_HSV_KEY_HUD ROT_CCW
-#define SETTING_HSV_KEY_HUI ROT_CW
-
 #define SETTING_MODE_INDICATION_IDX 1
-#define SETTING_MODE_INDICATION_KEY KEY2
-#define SETTING_MODE_INDICATION_KEY_UP ROT_CW
-#define SETTING_MODE_INDICATION_KEY_DOWN ROT_CCW
-
 #define SETTING_MODE_COUNT_IDX 2
-#define SETTING_MODE_COUNT_KEY KEY3
-#define SETTING_MODE_COUNT_KEY_UP ROT_CW
-#define SETTING_MODE_COUNT_KEY_DOWN ROT_CCW
-
-#define SETTING_COUNT 3
 
 struct setting {
     bool enabled;
@@ -138,24 +117,33 @@ void settings_complete_mode_count(void) {
 
 void settings_init(void) {
 
+    #ifdef SETTING_HSV_ENABLE
     settings[SETTING_HSV_IDX].keycode = SETTING_HSV_KEY;
     settings[SETTING_HSV_IDX].update = settings_update_mode_hsv;
     settings[SETTING_HSV_IDX].complete = settings_complete_mode_hsv;
-    #ifdef SETTING_HSV_ENABLE
     settings[SETTING_HSV_IDX].enabled = true;
+    #else
+    //settings[SETTING_HSV_IDX].keycode = 0xFF;
+    //settings[SETTING_HSV_IDX].enabled = false;
     #endif
 
+    #ifdef SETTING_MODE_INDICATION_ENABLE
     settings[SETTING_MODE_INDICATION_IDX].keycode = SETTING_MODE_INDICATION_KEY;
     settings[SETTING_MODE_INDICATION_IDX].update = settings_update_mode_indication;
     settings[SETTING_MODE_INDICATION_IDX].complete = settings_complete_mode_indication;
-    #ifdef SETTING_MODE_INDICATION_ENABLE
     settings[SETTING_MODE_INDICATION_IDX].enabled = true;
+    #else
+    //settings[SETTING_MODE_INDICATION_IDX].keycode = 0xFF;
+    //settings[SETTING_MODE_INDICATION_IDX].enabled = false;
     #endif
 
+    #ifdef SETTING_MODE_COUNT_ENABLE
     settings[SETTING_MODE_COUNT_IDX].keycode = SETTING_MODE_COUNT_KEY;
     settings[SETTING_MODE_COUNT_IDX].update = settings_update_mode_count;
     settings[SETTING_MODE_COUNT_IDX].complete = settings_complete_mode_count;
-    #ifdef SETTING_MODE_COUNT_ENABLE
     settings[SETTING_MODE_COUNT_IDX].enabled = true;
+    #else
+    //settings[SETTING_MODE_COUNT_IDX].keycode = 0xFF;
+    //settings[SETTING_MODE_COUNT_IDX].enabled = false;
     #endif
 }

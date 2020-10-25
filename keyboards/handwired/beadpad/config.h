@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //how many keys are there, exluding rotary encoder - expects them to be hooked up as a single row
 #define KEY_COUNT 5
+#define KEYS KEY1, KEY2, KEY3, KEY4, KEY5
 
 //key pins
 #define KEY_ROW_PIN F7
@@ -87,4 +88,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 //beadpad_config.h includes the standard config.h definitions, updated according to above, which shouldn't need to be modified.
-#include "beadpad_config.h"
+#include "lib/beadpad_config.h"

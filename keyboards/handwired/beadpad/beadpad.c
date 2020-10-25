@@ -16,6 +16,4 @@
 
 #include "beadpad.h"
 
-//#include "beadpad_mode.h"
-
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {{{ KEYS, ROT_BUT }}};

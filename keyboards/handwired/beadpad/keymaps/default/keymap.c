@@ -16,7 +16,6 @@
 
 #include QMK_KEYBOARD_H
 
-
 //##########################################################################################################################
 //things you will want to change
 
@@ -37,16 +36,16 @@
 #define MODE_COUNT 8 // number of modes to switch through
 
 //==============================================================================================
-//enable settinguration settings during operation to permit changing the settings above after flashing
+//enable changes during operation
 
 //  - hold the setting key (indicated below) and press other keys to adjust settings,
 //  - releasing setting key saves to eeprom
-//  - these will be reset during flash unless PRESERVE_SETTINGS is defined
+//  - these will be reset during flash unless SETTING_PRESERVE is defined
 #define SETTING_HSV_ENABLE //HOLD KEY1 (SETTING_HSV_KEY) - KEY2/KEY3 = Sat, KEY4/KEY5 = Val, ROT_CW/ROT_CCW = Hue
 #define SETTING_MODE_INDICATION_ENABLE //HOLD KEY2 (SETTING_MODE_INDICATION_KEY) - ROT_CW/ROT_CCW change mode indication setting
 #define SETTING_MODE_COUNT_ENABLE //HOLD KEY3 (SETTING_MODE_COUNT_KEY) - ROT_CW/ROT_CCW change number of modes (count indicated in binary)
 
-//#define PRESERVE_SETTINGS
+//#define SETTING_PRESERVE
 
 //==============================================================================================
 //define how modes are switched between
@@ -75,9 +74,26 @@
 #define SAT_RESOLUTION 6
 #define VAL_RESOLUTION 4
 
+
+#define SETTING_HSV_KEY KEY1
+#define SETTING_HSV_KEY_SAD KEY2
+#define SETTING_HSV_KEY_SAI KEY3
+#define SETTING_HSV_KEY_VAD KEY4
+#define SETTING_HSV_KEY_VAI KEY5
+#define SETTING_HSV_KEY_HUD ROT_CCW
+#define SETTING_HSV_KEY_HUI ROT_CW
+
+#define SETTING_MODE_INDICATION_KEY KEY2
+#define SETTING_MODE_INDICATION_KEY_UP ROT_CW
+#define SETTING_MODE_INDICATION_KEY_DOWN ROT_CCW
+
+#define SETTING_MODE_COUNT_KEY KEY3
+#define SETTING_MODE_COUNT_KEY_UP ROT_CW
+#define SETTING_MODE_COUNT_KEY_DOWN ROT_CCW
+
 //##########################################################################################################################
 //things you shouldn't need to change
 
 //include the library code that handles processing of these values.
-#include "beadpad_core.c"
+#include "lib/beadpad_core.c"
 

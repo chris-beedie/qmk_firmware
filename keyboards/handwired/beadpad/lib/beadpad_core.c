@@ -18,10 +18,11 @@
 //TODO - update info.json
 //TODO - add ifndefs for all users vars
 //TODO - comment
-//TODO check invalid define options here
+//TODO - check invalid define options here
 //TODO - change rot button to dedicated pin to clean up keymap
+//TODO - option to not have rot enc
 //TODO sleep not working
-
+//todo - check that keymap mi settings works
 
 
 
@@ -83,7 +84,7 @@ void send_keypress(uint8_t mode, uint16_t keycode) {
 void handle_key(uint16_t keycode, bool pressed) {
 
 
-    uprintf("here: %u, %u, %u, %u\n", KEY2, KEY3, ROT_BUT, ROT_CCW);
+    //uprintf("here: %u, %u, %u, %u\n", KEY2, KEY3, ROT_BUT, ROT_CCW);
 
 
     //check and processs any finishing setting and exit further key handling
@@ -132,7 +133,7 @@ void beadpad_init(void) {
 //store the user defined settings in eeprom
 void beadpad_eeprom_init(bool force) {
 
-    #ifdef PRESERVE_SETTINGS
+    #ifdef SETTING_PRESERVE
     if (!force)
         return;
     #endif
@@ -186,15 +187,14 @@ void matrix_scan_user(void) {
 }
 
 
-// void suspend_power_down_kb(void) {
-//     hsv_enable(false);
-// }
+void suspend_power_down_user(void) {
+    hsv_enable(false);
+    hsv_refresh();
+}
 
-// void suspend_wakeup_init_kb(void) {
-//     mode_refresh();
-// }
-
-
+void suspend_wakeup_init_user(void) {
+    mode_refresh();
+}
 
 
 

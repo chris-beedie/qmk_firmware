@@ -1,7 +1,39 @@
 
-//#include "beadpad_mode.h"
-//#include "beadpad_eeprom.h"
-//#include "beadpad_led.h"
+// defaults ========================================================================================================
+//default hsv for modes
+#ifndef HSV_MODE_0
+#define HSV_MODE_0 0,   255, 50
+#endif
+#ifndef HSV_MODE_1
+#define HSV_MODE_1 30,  255, 50
+#endif
+#ifndef HSV_MODE_2
+#define HSV_MODE_2 60,  255, 50
+#endif
+#ifndef HSV_MODE_3
+#define HSV_MODE_3 90,  255, 50
+#endif
+#ifndef HSV_MODE_4
+#define HSV_MODE_4 120, 255, 50
+#endif
+#ifndef HSV_MODE_5
+#define HSV_MODE_5 150, 255, 50
+#endif
+#ifndef HSV_MODE_6
+#define HSV_MODE_6 180, 255, 50
+#endif
+#ifndef HSV_MODE_7
+#define HSV_MODE_7 210, 255, 50
+#endif
+
+#ifndef MODE_INDICATION
+#define MODE_INDICATION MI_MODE_UP
+#endif
+
+#ifndef MODE_COUNT
+#define MODE_COUNT 8
+#endif
+// vars =====================================================================================================================
 
 static uint8_t mode_count = MAX_MODES;
 static uint8_t mode_current = 0;
@@ -17,10 +49,6 @@ enum mode_indication_t {
 } mode_indication;
 
 #define MI_LAST MI_BINARY
-
-uint8_t mode_get_current(void) {
-    return mode_current;
-}
 
 // eeprom read/write  =========================================================================================================
 
@@ -87,7 +115,9 @@ void mode_decrement_indicator(void) {
     mode_set_indicator(decrement_wrap(mode_current, mode_count));
 }
 
-
+uint8_t mode_get_current(void) {
+    return mode_current;
+}
 
 void mode_set(uint8_t mode) {
     mode_current = mode;

@@ -17,34 +17,12 @@
 
 #include "quantum.h"
 
-// #include "beadpad_eeprom.h"
-// #include "beadpad_led.h"
-
 #define MAX_MODES 8
 #define MODE_BITS_SIZE 3
 #define TOTAL_KEY_COUNT KEY_COUNT + 3 //KEYS + ROT (but, ccw, cw)
 
 
-
-
-// enum KEY_BIT {
-//     KEY1,
-//     KEY2,
-//     KEY3,
-//     KEY4,
-//     KEY5,
-//     ROT_BUT,
-//     ROT_CCW,
-//     ROT_CW
-// };
-
-
-
-
-
-
-
-#define KEYS KEY1, KEY2, KEY3, KEY4, KEY5
+//#define KEYS KEY1, KEY2, KEY3, KEY4, KEY5
 #define ROT_KEYS ROT_BUT, ROT_CCW, ROT_CW
 
 enum key_bit_t {
