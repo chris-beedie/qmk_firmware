@@ -14,25 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#pragma once
 
 #include "ws2812.h"
 #include "color.h"
 
-#ifndef RGBLED_NUM
-#define RGBLED_NUM 5
-#endif
-
-#ifndef RGBLIGHT_HUE_STEP
-#define RGBLIGHT_HUE_STEP 4
-#endif
-
-#ifndef RGBLIGHT_SAT_STEP
-#define RGBLIGHT_SAT_STEP 4
-#endif
-
-#ifndef RGBLIGHT_VAL_STEP
-#define RGBLIGHT_VAL_STEP 16
-#endif
 
 HSV hsv_get_current(void);
 
@@ -54,3 +40,10 @@ void hsv_increase_val(void);
 void hsv_decrease_val(void);
 
 void hsv_set_binary(uint16_t bin_val, uint8_t hue, uint8_t sat, uint8_t val);
+
+// HSV hsv_mode_read(uint8_t mode);
+// void hsv_mode_write(uint8_t mode, uint8_t hue, uint8_t sat, uint8_t val);
+// void hsv_mode_write_current(uint8_t mode);
+
+uint16_t hsv_pack(uint8_t hue, uint8_t sat, uint8_t val);
+HSV hsv_unpack(uint16_t packed_hsv);

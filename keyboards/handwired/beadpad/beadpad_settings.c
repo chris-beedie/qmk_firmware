@@ -1,7 +1,7 @@
 
 #include "beadpad_settings.h"
-#include "beadpad_eeprom.h"
-
+//#include "beadpad_eeprom.h"
+#include "beadpad_mode.h"
 
 bool settings_try_update(uint16_t keycode) {
     //loop though each setting, if enabled and the key is down, action the new key
@@ -11,7 +11,7 @@ bool settings_try_update(uint16_t keycode) {
 
         if (setting.enabled && keycode != setting.keycode && keystate[setting.keycode] != NONE) {
             setting.update(keycode);
-            keystate[setting.keycode] = SETTING;
+            keystate[setting.keycode] = SETTINGS;
             return true;
         }
     }
@@ -24,7 +24,7 @@ bool settings_try_complete(uint16_t keycode) {
     for (uint8_t i = 0; i < SETTING_COUNT; i++) {
         struct setting setting = settings[i];
 
-        if (setting.enabled && keycode == setting.keycode && keystate[setting.keycode] == CONFIG) {
+        if (setting.enabled && keycode == setting.keycode && keystate[setting.keycode] == SETTINGS) {
             setting.complete();
             keystate[setting.keycode] = NONE;
             return true;
@@ -33,7 +33,7 @@ bool settings_try_complete(uint16_t keycode) {
     return false;
 }
 
-void settings_update_hsv(uint16_t keycode) {
+void settings_update_mode_hsv(uint16_t keycode) {
 
     switch (keycode) {
         case SETTING_HSV_KEY_SAD:
@@ -59,58 +59,56 @@ void settings_update_hsv(uint16_t keycode) {
     }
 }
 
-void settings_complete_hsv(void) {
-    HSV hsv = hsv_get_current();
-    eeprom_update_hsv(mode_current, hsv.h, hsv.s, hsv.v);
+void settings_complete_mode_hsv(void) {
+    mode_hsv_write();
 }
 
 void settings_update_mode_indication(uint16_t keycode) {
 
     switch (keycode) {
         case SETTING_MODE_INDICATION_KEY_UP:
-            mode_indication = increment(mode_indication, MI_LAST);
+            mode_indication_increment();
             break;
         case SETTING_MODE_INDICATION_KEY_DOWN:
-            mode_indication = decrement(mode_indication, 0);
+            mode_indication_decrement();
             break;
         default:
             break;
     }
 
-    mode_set(mode_current);
+    mode_refresh_indicator();
 }
 
 void settings_complete_mode_indication(void) {
-    eeprom_update_mode_indication(mode_indication);
+    mode_indication_write();
 }
 
 void settings_update_mode_count(uint16_t keycode) {
 
     switch (keycode) {
         case SETTING_MODE_COUNT_KEY_UP:
-            mode_count = increment(mode_count, MAX_MODES);
+            mode_count_increment();
             break;
         case SETTING_MODE_COUNT_KEY_DOWN:
-            mode_count = decrement(mode_count, 1);
+            mode_count_decrement();
             break;
         default:
             break;
     }
 
-    hsv_enable_binary(mode_count);
-    hsv_set(0,0,hsv_get_current().v);
+    mode_count_display();
 }
 
 void settings_complete_mode_count(void) {
-    eeprom_update_mode_count(mode_count);
+    mode_count_write();
     mode_set(0);
 }
 
 void settings_init(void) {
 
     settings[SETTING_HSV_IDX].keycode = SETTING_HSV_KEY;
-    settings[SETTING_HSV_IDX].update = settings_update_hsv;
-    settings[SETTING_HSV_IDX].complete = settings_complete_hsv;
+    settings[SETTING_HSV_IDX].update = settings_update_mode_hsv;
+    settings[SETTING_HSV_IDX].complete = settings_complete_mode_hsv;
     #ifdef SETTING_HSV_ENABLE
     settings[SETTING_HSV_IDX].enabled = true;
     #endif

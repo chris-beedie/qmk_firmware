@@ -30,14 +30,6 @@
 
 
 
-    //files for:
-        settings
-        mode
-
-
-
-
-
 */
 
 
@@ -45,10 +37,12 @@
 //would need to do checks like making sure the KEY_BITS array and count all make sense
 //can hsv increments be tied to number of bits?
 
-#include "beadpad_eeprom.h"
+//#include "beadpad_eeprom.h"
 
-#include "beadpad_mode.c"
-#include "beadpad_settings.c"
+
+#include "beadpad_mode.h"
+#include "beadpad_led.h"
+#include "beadpad_settings.h"
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {{{ KEYS, ROT_BUT }}};
 
@@ -73,14 +67,6 @@ const int KEY_BITS_ARR[] = KEY_BITS ;
 #define KEY_MODE_DOWN 0xF1
 #endif
 
-enum keystate_t {
-    NONE,
-    PRESSED,
-    SETTING,
-    HELD
-} keystate[TOTAL_KEY_COUNT];
-
-uint16_t mode_hold_timer;
 
 void beadpad_init(void) {
 
@@ -103,14 +89,14 @@ void beadpad_eeprom_init(bool force) {
         eeprom_update_mode_count(MODE_COUNT);
         eeprom_update_mode_indication(MODE_INDICATION);
 
-        eeprom_update_hsv(0, HSV_MODE_0);
-        eeprom_update_hsv(1, HSV_MODE_1);
-        eeprom_update_hsv(2, HSV_MODE_2);
-        eeprom_update_hsv(3, HSV_MODE_3);
-        eeprom_update_hsv(4, HSV_MODE_4);
-        eeprom_update_hsv(5, HSV_MODE_5);
-        eeprom_update_hsv(6, HSV_MODE_6);
-        eeprom_update_hsv(7, HSV_MODE_7);
+        eeprom_update_mode_hsv(0, hsv_pack(HSV_MODE_0));
+        eeprom_update_mode_hsv(1, hsv_pack(HSV_MODE_1));
+        eeprom_update_mode_hsv(2, hsv_pack(HSV_MODE_2));
+        eeprom_update_mode_hsv(3, hsv_pack(HSV_MODE_3));
+        eeprom_update_mode_hsv(4, hsv_pack(HSV_MODE_4));
+        eeprom_update_mode_hsv(5, hsv_pack(HSV_MODE_5));
+        eeprom_update_mode_hsv(6, hsv_pack(HSV_MODE_6));
+        eeprom_update_mode_hsv(7, hsv_pack(HSV_MODE_7));
 
         eeprom_set_valid(true);
     }
@@ -194,10 +180,6 @@ void handle_key(uint16_t keycode, bool pressed) {
         #ifdef MODE_ROT_ADJUST_ENABLED
         if (keystate[ROT_BUT] != NONE) {
             keycode = keycode == ROT_CW ? KEY_MODE_UP : KEY_MODE_DOWN;
-            // if(keycode == ROT_CW)
-            //     keycode = KEY_MODE_UP;
-            // else if(keycode == ROT_CCW)
-            //     keycode = KEY_MODE_DOWN;
         }
         #endif
         uprintf("l\n");

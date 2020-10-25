@@ -32,5 +32,10 @@ enum key_bit_t {
     ROT_KEYS
 };
 
-
+enum keystate_t {
+    NONE,
+    PRESSED,
+    SETTINGS,
+    HELD
+} keystate[TOTAL_KEY_COUNT];
 
