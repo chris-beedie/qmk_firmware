@@ -16,4 +16,8 @@
 
 #include "beadpad.h"
 
+#ifdef ENCODER_ENABLE
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {{{ KEYS, ROT_BUT }}};
+#else
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {{{ KEYS }}};
+#endif

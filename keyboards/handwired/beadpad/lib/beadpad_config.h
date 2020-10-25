@@ -13,12 +13,15 @@
 /* key matrix size */
 #define MATRIX_ROWS 1
 #define MATRIX_COLS KEY_COUNT + 1 //TODO - remove rot from this
-#define ENCODER_RESOLUTION 4
+
 
 #define MATRIX_ROW_PINS { KEY_ROW_PIN }
 #define MATRIX_COL_PINS KEY_COL_PINS
+#ifdef ENCODER_ENABLE
 #define ENCODERS_PAD_A { ENCODER_PAD_A }
 #define ENCODERS_PAD_B { ENCODER_PAD_B }
+#define ENCODER_RESOLUTION 4
+#endif
 #define UNUSED_PINS
 
 #define DIODE_DIRECTION COL2ROW
@@ -37,5 +40,5 @@
 #define NO_ACTION_ONESHOT
 #define NO_ACTION_MACRO
 #define NO_ACTION_FUNCTION
-#define NO_DEBUG
+//#define NO_DEBUG
 //#define NO_PRINT

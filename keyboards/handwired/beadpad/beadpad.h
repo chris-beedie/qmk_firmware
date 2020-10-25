@@ -19,11 +19,17 @@
 
 #define MAX_MODES 8
 #define MODE_BITS_SIZE 3
-#define TOTAL_KEY_COUNT KEY_COUNT + 3 //KEYS + ROT (but, ccw, cw)
 
-
-//#define KEYS KEY1, KEY2, KEY3, KEY4, KEY5
+#ifdef ENCODER_ENABLE
+#define ROT_KEY_COUNT 3
 #define ROT_KEYS ROT_BUT, ROT_CCW, ROT_CW
+#else
+#define ROT_KEY_COUNT 0
+#define ROT_KEYS
+#endif
+
+#define TOTAL_KEY_COUNT KEY_COUNT + ROT_KEY_COUNT
+
 
 enum key_bit_t {
     KEYS,

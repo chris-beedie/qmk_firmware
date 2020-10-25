@@ -39,9 +39,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //TODO - dedicated PIN
 
 
-//LED config - assumes there is an rgb LED per key
+
+//LED config - assumes there is an rgb LED per key (excluding rotary encoder)
 #define LED_PIN B6
 
+
+//==============================================================================================================
+//keys for sending data
 
 //keys used to represent the control and status bits
 //these are used to encode the message from the beadpad to the awating python script
@@ -59,33 +63,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //there should be a key mapped to each bit
 #define KEY_BITS_SIZE 3
 #define KEY_BITS  { KC_F20, KC_F19, KC_F18 }
-
-
-
-
-// #define VA_NARGS_IMPL(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
-// #define VA_NARGS(...) VA_NARGS_IMPL(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
-// #define COUNT_VA(...)  VA_NARGS(__VA_ARGS__)
-
-// #define X COUNT_VA(KEY_BITS)
-
-// #if X == 1
-// uprintf("");
-// #endif
-
-
-// #if X == 2
-// uprintf("");
-// #endif
-
-// #if X == 3
-// uprintf("");
-// #endif
-
-// #if X == KEY_BITS_SIZE
-// uprintf("");
-// #endif
-
 
 //beadpad_config.h includes the standard config.h definitions, updated according to above, which shouldn't need to be modified.
 #include "lib/beadpad_config.h"

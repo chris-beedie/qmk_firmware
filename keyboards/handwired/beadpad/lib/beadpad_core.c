@@ -16,26 +16,19 @@
 
 //TODO - update readme
 //TODO - update info.json
-//TODO - add ifndefs for all users vars
+
 //TODO - comment
 //TODO - check invalid define options here
 //TODO - change rot button to dedicated pin to clean up keymap
 //TODO - option to not have rot enc
-//TODO sleep not working
+
 //todo - check that keymap mi settings works
-
-
-
-
-
+//todo - support key matrix and dual encoders so bdn9 works?
 
 //mode count check
 #if MODE_COUNT > MAX_MODES
 #error MODES must be <= 8
 #endif
-
-const int MODE_BITS_ARR[] = MODE_BITS ;
-const int KEY_BITS_ARR[] = KEY_BITS ;
 
 #ifndef MODE_HOLD_TERM
 #define MODE_HOLD_TERM 500
@@ -49,6 +42,9 @@ const int KEY_BITS_ARR[] = KEY_BITS ;
 #ifndef KEY_MODE_DOWN
 #define KEY_MODE_DOWN 0xF1
 #endif
+
+const int MODE_BITS_ARR[] = MODE_BITS ;
+const int KEY_BITS_ARR[] = KEY_BITS ;
 
 #include "beadpad_util.c"
 #include "beadpad_led.c"
@@ -82,9 +78,6 @@ void send_keypress(uint8_t mode, uint16_t keycode) {
 
 //main method for porcessing what action to take given the state of the keys
 void handle_key(uint16_t keycode, bool pressed) {
-
-
-    //uprintf("here: %u, %u, %u, %u\n", KEY2, KEY3, ROT_BUT, ROT_CCW);
 
 
     //check and processs any finishing setting and exit further key handling
@@ -178,9 +171,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return false;
 }
 
+#ifdef ENCODER_ENABLE
 void encoder_update_user(uint8_t index, bool clockwise) {
    handle_key(clockwise ? ROT_CW : ROT_CCW, false);
 }
+#endif
 
 void matrix_scan_user(void) {
     mode_hold_check();

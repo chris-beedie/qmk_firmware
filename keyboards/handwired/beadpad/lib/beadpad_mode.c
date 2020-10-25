@@ -217,7 +217,7 @@ void mode_hold_check(void) {
 }
 
 uint16_t mode_rot_adjust_try_action(uint16_t keycode) {
-    #ifdef MODE_ROT_ADJUST_ENABLED
+    #if defined(ENCODER_ENABLE) && defined (MODE_ROT_ADJUST_ENABLED)
     if (keystate[ROT_BUT] != NONE) {
         return keycode == ROT_CW ? KEY_MODE_UP : KEY_MODE_DOWN;
     }
